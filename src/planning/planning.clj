@@ -8,6 +8,12 @@
 (defrecord Team [name members])
 (defrecord Project [name key-dates])
 
+(defprotocol Workable
+  (workable-start [workable])
+  (workable-end [workable]))
+
+
+
 
 (defn add-members
   [team & new-members]
@@ -81,24 +87,23 @@ be a planned date or an actual date"
       (.after date end) end
       :else date)))
    
-; Let's see if we can use a protocol here
+(extend-type Project
+  Workable
+  (workable-start [proj]
+                  (start-date proj))
+  (workable-end [proj]
+                (end-date proj)))
+
 (defn duration
-  "Computes the duration of a date range"
-  [start end]
-  (let [s-time (.getTime start)
-        e-time (.getTime end)
+  "Computes the duration of a Workable"
+  [workable]
+  (let [s-time (.getTime (workable-start workable))
+        e-time (.getTime(workable-end workable))
         delta (Math/abs (- e-time s-time))
         num-days (/ delta 1000.0 60.0 60.0 24.0)]
     num-days))
 
-(defn project-duration
-  "Returns the number of days a project spans"
-  [proj]
-  (let [start (start-date proj)
-        end (end-date proj)]
-    (duration start end)))
         
-; Can we do a protocol for duration for a project?
 ; We should have the sense of project priority
 ; We should be able to estimate project overload to hold dates
 ; We should be able to compute project breakpoints to preserve resource loading
