@@ -103,6 +103,48 @@ be a planned date or an actual date"
         num-days (/ delta 1000.0 60.0 60.0 24.0)]
     num-days))
 
+(defn fraction-of-workable
+  "Returns the fraction that a date is in a workable"
+  [workable d]
+  (let [s (workable-start workable)
+        e (workable-end workable)
+        s-time (.getTime s)
+        e-time (.getTime e)
+        d-time (.getTime d)]
+    (if (or (< d-time s-time) (> d-time e-time))
+      nil
+      (/ (- d-time s-time) (- e-time s-time)))))
+
+; TODO: Create a function that can create density functions. These should be memoized.
+(defn uniform-density
+  "Returns the cumulative value between two points in [0, 1]"
+  [start end]
+  (- end start))
+
+(defn project-role-loading
+  "Returns the loading for a role over a seq of date ranges"
+  [proj role date-ranges]
+  ; We'll default to uniform density for now, but this should come from the role
+  (let [density-f uniform-density
+        total-role-loading ((:est-load proj) role)
+        date-ranges-as-fractions (for [r date-ranges]  (map (partial fraction-of-workable proj) r))
+        normalized-values (for [r date-ranges-as-fractions] (apply density-f r)) 
+        ]
+    (map #(* total-role-loading %) normalized-values)))
+
+(defn project-roles
+  "Returns the roles for a project"
+  [proj]
+  (keys (:est-load proj)))
+  
+(defn project-loading
+  "Returns the loading of a project by role over a seq of date-ranges"
+  [proj date-ranges]
+  (let [roles (project-roles proj)        
+        role-loading (for [r roles] (project-role-loading proj r date-ranges)) ; NOTE: This can be parallelized 
+        ]
+    (zipmap roles role-loading)))
+
         
 ; We should have the sense of project priority
 ; We should be able to estimate project overload to hold dates
@@ -124,6 +166,8 @@ be a planned date or an actual date"
 
 (def jupiter (ref (Project. "Jupiter" {:planned-start (str-to-date "2011-07-31"), :planned-finish (str-to-date "2011-10-30")})))
 (dosync (ref-set jupiter (add-resource-req @jupiter {"Node Engineer" 1.5, "QA" 0.25})))
+
+(def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
 
 ; TODO: Add a function that can determine resource availability. We should do one version greedily
 ; Another version might try to be smarter about how to allocate someone who can do multiple things
