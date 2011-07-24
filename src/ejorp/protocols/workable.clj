@@ -1,4 +1,4 @@
-(ns protocols.workable)
+(ns ejorp.protocols.workable)
 
 (defprotocol Workable
   (workable-start [workable])

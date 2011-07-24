@@ -1,5 +1,5 @@
-(ns nouns.project
-  (:use protocols.workable))
+(ns ejorp.nouns.project
+  (:use ejorp.protocols.workable))
 
 
 ; TODO: Move this to a utils package

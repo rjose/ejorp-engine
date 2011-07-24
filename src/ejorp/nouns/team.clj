@@ -1,4 +1,4 @@
-(ns nouns.team
+(ns ejorp.nouns.team
   (:use clojure.set))
 
 (defrecord Team [name members])

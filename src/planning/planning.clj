@@ -1,7 +1,7 @@
 (ns planning.planning  
   (:use ejorp.util.date)
-  (:use nouns.project, nouns.team, nouns.person)
-  (:import nouns.project.Project, nouns.team.Team, nouns.person.Person)
+  (:use ejorp.nouns.project, ejorp.nouns.team, ejorp.nouns.person)
+  (:import ejorp.nouns.project.Project, ejorp.nouns.team.Team, ejorp.nouns.person.Person)
   )
 
 ; TODO: Use a ref for Person and Team
