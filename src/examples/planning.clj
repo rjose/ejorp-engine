@@ -1,4 +1,4 @@
-(ns planning.planning  
+(ns examples.planning  
   (:use ejorp.util.date)
   (:use ejorp.nouns.project, ejorp.nouns.team, ejorp.nouns.person)
   (:import ejorp.nouns.project.Project, ejorp.nouns.team.Team, ejorp.nouns.person.Person)
