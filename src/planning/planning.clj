@@ -145,6 +145,9 @@ be a planned date or an actual date"
         ]
     (zipmap roles role-loading)))
 
+; TODO: Enable the updating of a load computation by shifting a project out in time
+; Project loadings can be computed ahead of time and then manipulated. Actually, this should be doable on the client as well
+
         
 ; We should have the sense of project priority
 ; We should be able to estimate project overload to hold dates
