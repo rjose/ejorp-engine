@@ -1,3 +1,9 @@
+;; A project may be created without much detail. In a planning phase, only the name
+;; and the start/end dates are needed. As projects are started and tasks added,
+;; more detail will be added to each project.
+;; 
+;; We still need to understand how to presist projects (as well as other things
+;; that can have varying amounts of data in them)
 (ns ejorp.nouns.project
   (:use ejorp.protocols.workable))
 
@@ -8,7 +14,6 @@
   "Returns the cumulative value between two points in [0, 1]"
   [start end]
   (- end start))
-
 
 (defrecord Project [name key-dates])
 

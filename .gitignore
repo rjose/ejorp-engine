@@ -4,3 +4,4 @@ clojure-contrib.jar
 clojure-src.jar
 clojure.jar
 bin/*
+docs/uberdoc.html
