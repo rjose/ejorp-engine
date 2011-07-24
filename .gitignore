@@ -1,6 +1,6 @@
 .settings/ccw.repl.cmdhistory.prefs
-bin/planning/planning.clj
 clojure-contrib-src.jar
 clojure-contrib.jar
 clojure-src.jar
 clojure.jar
+bin/*
