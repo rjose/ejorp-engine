@@ -15,7 +15,7 @@
   [start end]
   (- end start))
 
-(defrecord Project [name key-dates])
+(defrecord Project [name])
 
 (defn add-resource-req
   "Specifies load estimates for a project"
@@ -36,13 +36,13 @@
   "Returns start date of project. Depending on stage of project, this may
 be a planned date or an actual date"
   [project]
-  (:planned-start (:key-dates project)))
+  (:planned-start (:planned-dates project)))
 
 (defn end-date
   "Returns end date of project. Depending on stage of project, this may
 be a planned date or an actual date"
   [project]
-  (:planned-finish (:key-dates project)))
+  (:planned-finish (:planned-dates project)))
 
 (defn clamp-date
   "This clamps a date to the project's date range."
@@ -81,6 +81,11 @@ be a planned date or an actual date"
 
 (extend-type Project
   Workable
+  (workable-set-planned-dates 
+    [proj start end]
+    (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
+      (assoc proj :planned-dates planned-dates)))    
+                              
   (workable-start [proj]
                   (start-date proj))
   (workable-end [proj]

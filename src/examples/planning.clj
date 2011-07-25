@@ -1,6 +1,7 @@
 (ns examples.planning  
   (:use ejorp.util.date)
   (:use ejorp.nouns.project, ejorp.nouns.team, ejorp.nouns.person)
+  (:use ejorp.protocols.workable)
   (:import ejorp.nouns.project.Project, ejorp.nouns.team.Team, ejorp.nouns.person.Person)
   )
 
@@ -30,8 +31,13 @@
 
 (def new-team (add-members a-team rino roland))
 
-(def jupiter (ref (Project. "Jupiter" {:planned-start (str-to-date "2011-07-31"), :planned-finish (str-to-date "2011-10-30")})))
-(dosync (ref-set jupiter (add-resource-req @jupiter {"Node Engineer" 1.5, "QA" 0.25})))
+;(def jupiter (ref (Project. "Jupiter" {:planned-start (str-to-date "2011-07-31"), :planned-finish (str-to-date "2011-10-30")})))
+;(def jupiter (ref (Project. "Jupiter")))
+
+(def jupiter (ref (-> (Project. "Jupiter")
+                   (workable-set-planned-dates (str-to-date "2011-07-31") (str-to-date "2011-10-30"))
+                   (add-resource-req {"Node Engineer" 1.5, "QA" 0.25}))))
+
 
 (def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
 

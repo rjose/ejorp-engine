@@ -1,6 +1,7 @@
 (ns ejorp.protocols.workable)
 
 (defprotocol Workable
+  (workable-set-planned-dates [workable start end])
   (workable-start [workable])
   (workable-end [workable]))
 
