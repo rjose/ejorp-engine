@@ -27,7 +27,7 @@
 (def rino (Person. 100 "Rino Jose" ["Node Engineer" "Rails Engineer" "SW Manager"]))
 (def roland (Person. 101 "Roland Jose" ["Warblade Knight"]))
 (def james (Person. 102 "James Simonsen" ["Node Engineer"]))
-(def a-team (Team. "SW Team" #{}))
+(def a-team (Team. "SW Team"))
 
 (def new-team (add-members a-team rino roland))
 
