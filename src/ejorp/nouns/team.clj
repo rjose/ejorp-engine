@@ -1,3 +1,8 @@
+;; Teams need to be created dynamically from the Person collection.
+;; For instance, if a user updates their primary role, the info
+;; won't be propagated automatically to the team.
+;;
+;; We'll have to think this through a little more.
 (ns ejorp.nouns.team
   (:use clojure.set))
 
@@ -11,7 +16,7 @@
 (defn remove-member
   "Removes a member from a team"
   [{:keys [members] :as team} {:keys [id]}]
-  (let [new-members (remove #(= id (:id %)) members)]
+  (let [new-members (set (remove #(= id (:id %)) members))]
     (assoc team :members new-members)))
     
 (defn primary-roles
@@ -28,5 +33,5 @@
 (defn team-roles 
   "Returns a set of all the roles that team members can play"
   [{:keys [members] :as team}]
-  (let [roles (flatten (map #(:roles %) members))]
-    (set roles)))
+  (reduce union (map #(:roles %) members)))
+  
