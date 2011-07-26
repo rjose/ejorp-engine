@@ -11,10 +11,20 @@
 (deftest test-team-membership
   (let [team1 (add-members team rino borvo)
         team2 (remove-member team1 borvo)]
-    (is (= #{rino borvo} (:members team1)))
-    (is (= #{rino} (:members team2)))))
+    (is (= #{rino borvo} (team-members team1)))
+    (is (= #{rino} (team-members team2)))))
 
-; TODO: Test that you can't add two members with the same ID
+(deftest test-unique-members
+  (let [rino2 (add-roles rino "Entrepreneur")
+        team1 (add-members team rino rino2)]
+    (is (= 1 (count (team-members team1))))))
+
+(deftest test-update-team-member
+  (let [rino2 (add-roles rino "Entrepreneur")
+        team1 (add-members team rino)
+        team2 (add-members team rino2)]
+    (is (= #{rino} (team-members team1)))
+    (is (= #{rino2} (team-members team2)))))
 
 (deftest test-team-roles
   (let [rino2 (add-roles rino "Node Engineer" "SW Manager")
