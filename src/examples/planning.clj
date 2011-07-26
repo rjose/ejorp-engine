@@ -39,7 +39,7 @@
 (def new-team (add-members a-team rino roland))
 
 (def jupiter (ref (-> (Project. "Jupiter")
-                   (workable-set-planned-dates (str-to-date "2011-07-31") (str-to-date "2011-10-30"))
+                   (set-planned-dates (str-to-date "2011-07-31") (str-to-date "2011-10-30"))
                    (add-resource-req {"Node Engineer" 1.5, "QA" 0.25}))))
 
 

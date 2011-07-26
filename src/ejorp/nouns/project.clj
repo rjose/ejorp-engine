@@ -1,11 +1,12 @@
+(ns ejorp.nouns.project
+  (:require [ejorp.protocols.workable :as workable]))
+
 ;; A project may be created without much detail. In a planning phase, only the name
 ;; and the start/end dates are needed. As projects are started and tasks added,
 ;; more detail will be added to each project.
 ;; 
 ;; We still need to understand how to presist projects (as well as other things
 ;; that can have varying amounts of data in them)
-(ns ejorp.nouns.project
-  (:use ejorp.protocols.workable))
 
 
 ; TODO: Move this to a utils package
@@ -60,7 +61,7 @@ be a planned date or an actual date"
   ; We'll default to uniform density for now, but this should come from the role
   (let [density-f uniform-density
         total-role-loading ((:est-load proj) role)
-        date-ranges-as-fractions (for [r date-ranges]  (map (partial fraction-of-workable proj) r))
+        date-ranges-as-fractions (for [r date-ranges]  (map (partial workable/fraction-of proj) r))
         normalized-values (for [r date-ranges-as-fractions] (apply density-f r)) 
         ]
     (map #(* total-role-loading %) normalized-values)))
@@ -80,13 +81,13 @@ be a planned date or an actual date"
 
 
 (extend-type Project
-  Workable
-  (workable-set-planned-dates 
+  workable/Workable
+  (workable/set-planned-dates 
     [proj start end]
     (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
       (assoc proj :planned-dates planned-dates)))    
                               
-  (workable-start [proj]
+  (workable/start-date [proj]
                   (start-date proj))
-  (workable-end [proj]
+  (workable/end-date [proj]
                 (end-date proj)))

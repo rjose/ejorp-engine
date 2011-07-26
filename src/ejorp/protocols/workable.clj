@@ -1,24 +1,24 @@
 (ns ejorp.protocols.workable)
 
 (defprotocol Workable
-  (workable-set-planned-dates [workable start end])
-  (workable-start [workable])
-  (workable-end [workable]))
+  (set-planned-dates [workable start end])
+  (start-date [workable])
+  (end-date [workable]))
 
 (defn duration
   "Computes the duration of a Workable"
   [workable]
-  (let [s-time (.getTime (workable-start workable))
-        e-time (.getTime(workable-end workable))
+  (let [s-time (.getTime (start-date workable))
+        e-time (.getTime(end-date workable))
         delta (Math/abs (- e-time s-time))
         num-days (/ delta 1000.0 60.0 60.0 24.0)]
     num-days))
 
-(defn fraction-of-workable
+(defn fraction-of
   "Returns the fraction that a date is in a workable"
   [workable d]
-  (let [s (workable-start workable)
-        e (workable-end workable)
+  (let [s (start-date workable)
+        e (end-date workable)
         s-time (.getTime s)
         e-time (.getTime e)
         d-time (.getTime d)]
