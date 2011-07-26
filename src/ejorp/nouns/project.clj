@@ -1,5 +1,5 @@
 (ns ejorp.nouns.project
-  (:require [ejorp.protocols.workable :as workable]))
+  (:use ejorp.protocols.workable))
 
 ;; A project may be created without much detail. In a planning phase, only the name
 ;; and the start/end dates are needed. As projects are started and tasks added,
@@ -33,27 +33,7 @@
         new-est-load (apply dissoc est-load roles)]
     (assoc project :est-load new-est-load)))
 
-(defn start-date
-  "Returns start date of project. Depending on stage of project, this may
-be a planned date or an actual date"
-  [project]
-  (:planned-start (:planned-dates project)))
 
-(defn end-date
-  "Returns end date of project. Depending on stage of project, this may
-be a planned date or an actual date"
-  [project]
-  (:planned-finish (:planned-dates project)))
-
-(defn clamp-date
-  "This clamps a date to the project's date range."
-  [proj date]
-  (let [start (start-date proj)
-        end (end-date proj)]
-    (cond
-      (.before date start) start
-      (.after date end) end
-      :else date)))
 
 (defn project-role-loading
   "Returns the loading for a role over a seq of date ranges"
@@ -61,10 +41,12 @@ be a planned date or an actual date"
   ; We'll default to uniform density for now, but this should come from the role
   (let [density-f uniform-density
         total-role-loading ((:est-load proj) role)
-        date-ranges-as-fractions (for [r date-ranges]  (map (partial workable/fraction-of proj) r))
+        date-ranges-as-fractions (for [r date-ranges]  (map (partial fraction-of proj) r))
         normalized-values (for [r date-ranges-as-fractions] (apply density-f r)) 
         ]
     (map #(* total-role-loading %) normalized-values)))
+
+
 
 (defn project-roles
   "Returns the roles for a project"
@@ -80,14 +62,28 @@ be a planned date or an actual date"
     (zipmap roles role-loading)))
 
 
+; TODO: Move to workable?
+(defn clamp-date
+  "This clamps a date to the project's date range."
+  [proj date]
+  (let [start (start-date proj)
+        end (end-date proj)]
+    (cond
+      (.before date start) start
+      (.after date end) end
+      :else date)))
+
 (extend-type Project
-  workable/Workable
-  (workable/set-planned-dates 
+  Workable
+  (set-planned-dates 
     [proj start end]
     (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
       (assoc proj :planned-dates planned-dates)))    
                               
-  (workable/start-date [proj]
-                  (start-date proj))
-  (workable/end-date [proj]
-                (end-date proj)))
+  (start-date
+    [project]
+    (:start (:planned-dates project)))
+
+  (end-date
+    [project]
+    (:end (:planned-dates project))))
