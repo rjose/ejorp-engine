@@ -1,7 +1,7 @@
 (ns ejorp.nouns.project
   (:use ejorp.protocols.workable))
 
-;; A project may be created without much detail. In a planning phase, only the name
+;; A project may be created without too much detail. Initially, only the name and 
 ;; and the start/end dates are needed. As projects are started and tasks added,
 ;; more detail will be added to each project.
 ;; 
@@ -18,6 +18,10 @@
 
 (defrecord Project [name])
 
+;; ## Resource Requirements
+;; The following functions allow us to update load estimates for projects. The units
+;; of load are full-time-equivalents (FTE) for the life of a project.
+
 (defn add-resource-req
   "Specifies load estimates for a project"
   [project load]
@@ -33,7 +37,16 @@
         new-est-load (apply dissoc est-load roles)]
     (assoc project :est-load new-est-load)))
 
+(defn project-roles
+  "Returns the roles for a project"
+  [proj]
+  (keys (:est-load proj)))
 
+;; ## Load Computation
+;; These functions compute the loading of a project over time. They use "density functions"
+;; to estimate the required effort profile.
+;; 
+;; These functions naturally decompose into smaller functions that can be executed in parallel.
 
 (defn project-role-loading
   "Returns the loading for a role over a seq of date ranges"
@@ -48,13 +61,9 @@
 
 
 
-(defn project-roles
-  "Returns the roles for a project"
-  [proj]
-  (keys (:est-load proj)))
-  
 (defn project-loading
-  "Returns the loading of a project by role over a seq of date-ranges"
+  "Returns the loading of a project by role over a seq of date-ranges.
+  Does the docstring need to be multiple lines?"
   [proj date-ranges]
   (let [roles (project-roles proj)        
         role-loading (for [r roles] (project-role-loading proj r date-ranges)) ; NOTE: This can be parallelized 
@@ -73,6 +82,7 @@
       (.after date end) end
       :else date)))
 
+;; ## Workable Protocol
 (extend-type Project
   Workable
   (set-planned-dates 
