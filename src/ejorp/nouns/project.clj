@@ -54,13 +54,24 @@
 
 
 (defn project-loading
-  "Returns the loading of a project by role over a seq of date-ranges.
-  Does the docstring need to be multiple lines?"
+  "Returns the loading of a project by role over a seq of date-ranges."
   [proj date-ranges]
   (let [roles (project-roles proj)        
         role-loading (for [r roles] (project-role-loading proj r date-ranges)) ; NOTE: This can be parallelized 
         ]
     (zipmap roles role-loading)))
+
+(defn p-project-loading
+  "This is the parallelized version of project-loading."
+  [proj date-ranges]
+  (let [roles (project-roles proj)
+        agents (map (fn [_] (agent proj)) roles)
+        role-to-agent (partition 2 (interleave roles agents))
+        working-agents (for [[r agt] role-to-agent] (send agt project-role-loading r date-ranges)) 
+        ]
+    (apply await working-agents)
+    (zipmap roles (for [agt working-agents] @agt))))
+    
 
 ;; ## Workable Protocol
 (extend-type Project
