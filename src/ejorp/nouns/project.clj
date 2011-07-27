@@ -1,5 +1,6 @@
 (ns ejorp.nouns.project
-  (:use ejorp.protocols.workable))
+  (:use ejorp.protocols.workable)
+  (:use ejorp.util.density-functions))
 
 ;; A project may be created without too much detail. Initially, only the name and 
 ;; and the start/end dates are needed. As projects are started and tasks added,
@@ -7,15 +8,6 @@
 ;; 
 ;; We still need to understand how to presist projects (as well as other things
 ;; that can have varying amounts of data in them)
-
-
-; TODO: Move this to a utils package
-; TODO: Create a function that can create density functions. These should be memoized.
-(defn uniform-density
-  "Returns the cumulative value between two points in [0, 1]"
-  [start end]
-  (- end start))
-
 (defrecord Project [name])
 
 ;; ## Resource Requirements
@@ -69,18 +61,6 @@
         role-loading (for [r roles] (project-role-loading proj r date-ranges)) ; NOTE: This can be parallelized 
         ]
     (zipmap roles role-loading)))
-
-
-; TODO: Move to workable?
-(defn clamp-date
-  "This clamps a date to the project's date range."
-  [proj date]
-  (let [start (start-date proj)
-        end (end-date proj)]
-    (cond
-      (.before date start) start
-      (.after date end) end
-      :else date)))
 
 ;; ## Workable Protocol
 (extend-type Project

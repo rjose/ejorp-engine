@@ -25,3 +25,13 @@
     (if (or (< d-time s-time) (> d-time e-time))
       nil
       (/ (- d-time s-time) (- e-time s-time)))))
+
+(defn clamp-date
+  "This clamps a date to a workable's date range."
+  [workable date]
+  (let [start (start-date workable)
+        end (end-date workable)]
+    (cond
+      (.before date start) start
+      (.after date end) end
+      :else date)))
