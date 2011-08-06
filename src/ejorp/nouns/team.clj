@@ -5,7 +5,7 @@
 ;; We won't store member information in Team records. The most we'll 
 ;; store is an ID. Everything else will be looked up as needed for whatever
 ;; operations need to be done.
-(defrecord Team [name])
+(defrecord Team [id name])
 
 ;; ## Team Membership
 

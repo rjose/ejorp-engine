@@ -1,9 +1,9 @@
-(ns test.ejorp.nouns.team
+(ns test.ejorp.nouns.test-team
   (:use clojure.test)
   (:use ejorp.nouns.team, ejorp.nouns.person)
   (:import ejorp.nouns.team.Team, ejorp.nouns.person.Person))
 
-(def team (Team. "Alpha Team"))
+(def team (Team. 10 "Alpha Team"))
 (def rino (Person. 101 "Rino Jose"))
 (def borvo (Person. 102 "Borvo Borvison"))
 
