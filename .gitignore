@@ -1,7 +1,6 @@
 .settings/ccw.repl.cmdhistory.prefs
-clojure-contrib-src.jar
-clojure-contrib.jar
-clojure-src.jar
-clojure.jar
 bin/*
 docs/uberdoc.html
+.lein-failures
+*.class
+*.jar
