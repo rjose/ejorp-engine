@@ -14,7 +14,7 @@
 (defn add-members
   "Adds/updates team members"
   [team & new-members]
-  (let [updated-members (reduce (fn [m v] (assoc m (:id v) v)) (:members team) new-members)]
+  (let [updated-members (reduce (fn [m v] (assoc m (:id (first v)) v)) (:members team) new-members)]
     (assoc team :members updated-members)))
 
 (defn remove-member
@@ -37,17 +37,10 @@
 (defn primary-roles
   "Returns a map of the 'primary role' to 'number available' for a team"
   [{:keys [members]}]
-  (let [roles (map #(first (:roles %)) (vals members))]
+  (let [roles (map #(nth % 1) (vals members))]
     (reduce (fn [m role]
               (let [role-count (m role)]
                 (if (nil? role-count)
                   (assoc m role 1)
                   (assoc m role (inc role-count)))))
             {} roles)))
-
-
-(defn team-roles 
-  "Returns a set of all the roles that team members can play"
-  [{:keys [members] :as team}]
-  (reduce union (map #(:roles %) (vals members))))
-  
