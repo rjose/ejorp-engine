@@ -34,15 +34,15 @@
   [proj]
   (keys (:est-load proj)))
 
-    
+(defn set-planned-start-end
+    [proj start end]
+    (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
+      (assoc proj :planned-dates planned-dates)))    
+  
 
 ;; ## Workable Protocol
 (extend-type Project
   Workable
-  (set-planned-dates 
-    [proj start end]
-    (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
-      (assoc proj :planned-dates planned-dates)))    
                               
   (start-date
     [project]
