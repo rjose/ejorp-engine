@@ -49,13 +49,14 @@
 ;; what the net resource availability is.
 (defn resource-availability
   "Computes the net resource availability for a team against a loading trajectory"
-  [team loading]
+  [team loadings]
   (let [team-resources (primary-roles team)
-        roles (union (set (keys team-resources)) (set (keys loading)))
-        resources (merge (zipmap roles (repeat 0)) team-resources)        
-        net-resources (merge-with (fn [resource loading-seq] (map #(- resource %) loading-seq)) resources loading)]
+        roles (union (set (keys team-resources)) (set (mapcat keys loadings)))
+        resources (merge (zipmap roles (repeat 0)) team-resources)
+        total-loading (apply merge-with #(map + %1 %2) loadings)
+        net-resources (merge-with (fn [resource loading-seq] (map #(- resource %) loading-seq)) resources total-loading)]
     (into {} 
           (for [[k v] net-resources]
             (if (seq? v)
               [k v]
-              [k (take (count loading) (repeat v))])))))
+              [k (take (count (first loadings)) (repeat v))])))))
