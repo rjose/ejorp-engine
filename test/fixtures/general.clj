@@ -2,27 +2,71 @@
   (:use ejorp.nouns.project, ejorp.nouns.team, ejorp.nouns.person)
   (:use ejorp.util.date)
   (:use ejorp.reports.loading)
+  (:use clojure.set)
   (:import ejorp.nouns.team.Team, ejorp.nouns.person.Person, ejorp.nouns.project.Project)
   (:require [ejorp.protocols.workable :as workable]))
 
-(def rino (-> 
-            (Person. 100 "Rino Jose")
-            (add-roles "Node Engineer" "Rails Engineer" "SW Manager")))
-(def roland (-> 
-              (Person. 101 "Roland Jose")
-              (add-roles "Warblade Knight")))
-(def james (->
-             (Person. 102 "James Simonsen")
-             (add-roles "Node Engineer" "C++ Engineer")))
+(def rino (Person. 100 "Rino Jose"))
+(def roland (Person. 101 "Roland Jose"))
+(def james (Person. 102 "James Simonsen"))
 
-(def team (-> 
-            (Team. 10 "SW Team")
-            (add-members rino roland)))
+(def empty-sw-team (Team. 10 "SW Team"))
+(def sw-team (add-members empty-sw-team [rino "Node Engineer"] [roland "Warblade Knight"] [james "Node Engineer"]))
 
-(def jupiter (ref (-> (Project. 1000 "Jupiter")
-                   (workable/set-planned-dates (str-to-date "2011-07-31") (str-to-date "2011-10-30"))
-                   (add-resource-req {"Node Engineer" 1.5, "QA" 0.25}))))
 
-(def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
+;; TODO: We may need to rewrite these in the face of the new workable changes
+(def jupiter (-> (Project. 1000 "Jupiter")
+                   (set-planned-start-end (str-to-date "2011-07-31") (str-to-date "2011-10-30"))
+                   (add-resource-req {"Node Engineer" 1.5, "QA" 0.25})))
 
-(def jupiter-loading (project-loading @jupiter ranges-1))
+(def neptune (-> (Project. 1001 "Neptune")
+                   (set-planned-start-end (str-to-date "2011-07-15") (str-to-date "2011-11-30"))
+                   (add-resource-req {"Node Engineer" 2.5, "QA" 0.5, "Warblade Knight" 1.0})))
+
+; (def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
+;; ## Date Ranges
+(def ranges1 (partition 2 (map str-to-date ["2011-08-01" "2011-09-01", "2011-09-01" "2011-10-30"])))
+
+;; ## Project Loading
+(def jupiter-loading (project-loading jupiter ranges1))
+(def neptune-loading (project-loading neptune ranges1))
+
+;; ## Resource availability
+(def avail (resource-availability sw-team [jupiter-loading neptune-loading]))
+
+; TODO: Describe this
+(defn- normalize-unused-resources
+  [net-resources num-date-ranges]
+  (into {}
+        (for [[k v] net-resources]
+          (if (seq? v)
+            [k v]
+            [k (take num-date-ranges (repeat v))]))))  
+
+; TODO: Think about how we can apply this function to a generic project concept
+; TODO: Make project-roles more generic
+(defn net-avail
+  [team projects date-ranges]
+  (let [team-resources (primary-roles team)
+        roles (union (set (keys team-resources)) (set (mapcat project-roles projects)))
+        resources (merge (zipmap roles (repeat 0)) team-resources)
+        loadings (zipmap projects (map #(project-loading % date-ranges) projects))
+        total-loading (apply merge-with #(map + %1 %2) (vals loadings))
+        net-resources (merge-with (fn [resource loading-seq] (map #(- resource %) loading-seq)) resources total-loading)
+        norm-net-resources (normalize-unused-resources net-resources (count date-ranges))]
+    {:net-avail norm-net-resources, :loadings loadings, :date-ranges date-ranges}))
+
+(def net-avail-results (net-avail sw-team [jupiter neptune] ranges1))
+
+;(defn shift-project
+;  [{:keys [loadings date-ranges]} proj num-days]
+;  (let [loadings-without-proj (into {} (filter #(not= (:id proj) (:id (first %))) loadings))
+;        proj-dates (into {} (map (fn [[k v]] [k (.plusDays v num-days)]) (:planned-dates proj)))
+;        shifted-project (assoc proj :planned-dates proj-dates)
+;        new-loading (project-loading shifted-project date-ranges)
+;        
+;        total-loading (apply merge-with #(map + %1 %2) (conj (vals loadings-without-proj) new-loading))
+;        ]
+;    [(vals loadings-without-proj), new-loading]))
+
+;(shift-project net-avail-results neptune 10)

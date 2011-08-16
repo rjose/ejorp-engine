@@ -1,39 +1,35 @@
 (ns test.ejorp.nouns.test-team
   (:use clojure.test)
   (:use ejorp.nouns.team, ejorp.nouns.person)
-  (:import ejorp.nouns.team.Team, ejorp.nouns.person.Person))
-
-(def team (Team. 10 "Alpha Team"))
-(def rino (Person. 101 "Rino Jose"))
-(def borvo (Person. 102 "Borvo Borvison"))
+  (:import ejorp.nouns.team.Team, ejorp.nouns.person.Person)
+  (:use fixtures.general))
 
 ;; Here, we're just testing that we can add and remove members from a team.
 (deftest test-team-membership
-  (let [team1 (add-members team rino borvo)
-        team2 (remove-member team1 borvo)]
-    (is (= #{rino borvo} (team-members team1)))
-    (is (= #{rino} (team-members team2)))))
+  (let [team1 (add-members sw-team [rino "Node Engineer"] [james "Node Engineer"])
+        team2 (remove-member team1 james)]
+    (is (= #{[rino "Node Engineer"] [james "Node Engineer"] [roland "Warblade Knight"]} (team-members team1)))
+    (is (= #{[rino "Node Engineer"] [roland "Warblade Knight"]} (team-members team2)))))
 
 ;; This tests that we don't have two members with the same ID.
 (deftest test-unique-members
-  (let [rino2 (add-roles rino "Entrepreneur")
-        team1 (add-members team rino rino2)]
-    (is (= 1 (count (team-members team1))))))
+  (let [rino2 (assoc rino :some-data "Data")
+        team1 (add-members sw-team [rino "SW"] [rino2 "Manager"])]
+    (is (= 3 (count (team-members team1))))))
 
 ;; This is a variation of the prior test that checks that when a member with
 ;; the same ID as another member is added to a team, that member replaces the
 ;; existing member.
 (deftest test-update-team-member
-  (let [rino2 (add-roles rino "Entrepreneur")
-        team1 (add-members team rino)
-        team2 (add-members team rino2)]
-    (is (= #{rino} (team-members team1)))
-    (is (= #{rino2} (team-members team2)))))
+  (let [rino2 (assoc rino :some-data "Data")
+        t (add-members empty-sw-team [rino "SW Engineer"])
+        team1 (add-members t [rino "SW Engineer"])
+        team2 (add-members t [rino2 "SW Manager"])]
+    (is (= #{[rino "SW Engineer"]} (team-members t)))
+    (is (= #{[rino "SW Engineer"]} (team-members team1)))
+    (is (= #{[rino2 "SW Manager"]} (team-members team2)))))
 
 ;; This tests that we can get the various team roles.
 (deftest test-team-roles
-  (let [rino2 (add-roles rino "Node Engineer" "SW Manager")
-        borvo2 (add-roles borvo "Node Engineer" "QA")
-        team1 (add-members team rino2 borvo2)]
-    (is (= {"Node Engineer" 2}, (primary-roles team1)))
-    (is (= #{"Node Engineer" "SW Manager" "QA"}, (team-roles team1)))))
+  (let [team1 (add-members sw-team [rino "Node Engineer"] [james "Architect"])]
+    (is (= {"Node Engineer" 1, "Architect" 1, "Warblade Knight" 1}, (primary-roles team1)))))

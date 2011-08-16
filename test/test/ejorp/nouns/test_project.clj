@@ -8,6 +8,7 @@
   (:import ejorp.nouns.team.Team, ejorp.nouns.person.Person, ejorp.nouns.project.Project)
   (:use fixtures.general))
 
+
 ; TODO: Enable the updating of a load computation by shifting a project out in time
 ; Project loadings can be computed ahead of time and then manipulated. Actually, this should be doable on the client as well
 
@@ -36,21 +37,30 @@
     (is (= {"Node Engineer" 1.5} (:est-load proj4)))))
 
 (deftest test-project-roles
-  (let [roles (project-roles @jupiter)]
+  (let [roles (project-roles jupiter)]
     (is (= #{"Node Engineer" "QA"} (set roles)))))
 
 
 ;; ## Load Computation
 (deftest test-loading-computation
-  (let [loading (project-role-loading @jupiter "QA" ranges-1)]
+  (let [loading (project-role-loading jupiter "QA" ranges1)]
     (is (approx= 0.085 (nth loading 0) 0.01))
     (is (approx= 0.16 (nth loading 1) 0.01))))
 
 
 (deftest test-project-loading
-  (let [loading (project-loading @jupiter ranges-1)
+  (let [loading (project-loading jupiter ranges1)
         node-eng-load (loading "Node Engineer")
         qa-load (loading "QA")]
     (is (approx= 0.97 (nth node-eng-load 1) 0.01))
     (is (approx= 0.16 (nth qa-load 1) 0.01))))
+
+;; ## Shifting projects
+(deftest test-shift-project
+  (let [num-days 7
+        shifted-proj (shift-project jupiter num-days)
+        orig-dates (:planned-dates jupiter)
+        new-dates (:planned-dates shifted-proj)]
+    (is (= (:start new-dates) (.plusDays (:start orig-dates) num-days)))
+    (is (= (:end new-dates) (.plusDays (:end orig-dates) num-days)))))
     
