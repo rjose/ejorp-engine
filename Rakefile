@@ -1,6 +1,6 @@
 desc "Generate documentation files"
 task :docs do
-  sh "java -jar ~/jars/marginalia.jar src/ejorp/reports"
+  sh "java -jar ~/jars/marginalia.jar src"
 end
 
 desc "Runs tests"
