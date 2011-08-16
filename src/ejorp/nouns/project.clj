@@ -34,6 +34,15 @@
   [proj]
   (keys (:est-load proj)))
 
+;; TODO: Revise this given the new functions for shifting workables. In particular, shifting a project
+;; should also shift the project's load trajectories
+
+;; ## Shifting projects
+(defn shift-project
+  [proj num-days]
+  (let [new-dates (into {} (map (fn [[k v]] [k (.plusDays v num-days)]) (:planned-dates proj)))]
+    (assoc proj :planned-dates new-dates)))
+  
 (defn set-planned-start-end
     [proj start end]
     (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
