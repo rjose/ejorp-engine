@@ -13,62 +13,6 @@
   (let [planned-dates (assoc (:planned-dates w) :start start :end end)]
     (assoc w :planned-dates planned-dates)))
 
-; TODO: Add this to the load-traj module
-(defn make-uniform-load-traj
-  "Constructs a load-traj function with uniform density over a time period"
-  [scale [start-date end-date]]
-  (let [density-f (load-traj/scale-density-fn scale load-traj/uniform-density)
-        traj-f (partial load-traj/load-traj start-date end-date density-f)]
-    traj-f))
-
-(def sw-load-traj (make-uniform-load-traj 2.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
-(def qa-load-traj (make-uniform-load-traj 1.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
-
-
-
-; TODO: Add to load-traj module
-; This is a convenience function for initial planning
-(defn make-composite-uniform-load-traj
-  "Constructs a map of roles to uniform load trajectories"
-  [scale-map date-range]
-  (into {} (map (fn [[role scale]] [role (make-uniform-load-traj scale date-range)]) scale-map)))
-
-(def traj-map1 (make-composite-uniform-load-traj {"SW" 2.0, "QA" 1.0} (map str-to-date ["2011-07-30" "2011-08-30"])))
-
-(defn traj-seq
-  "Computes a seq of load trajectories given a load-traj function and a seq of date ranges"
-  [load-traj date-ranges]
-  (map load-traj date-ranges))
-
-; TODO: Add to load-traj module and think of a better name
-(defn all-load-traj
-  "Builds a function that returns the loading trajectory for all roles"
-  [load-map]
-  (fn [date-ranges]
-    (into {} (map (fn [[role traj-f]] [role (traj-seq traj-f date-ranges)]) load-map))))  
-
-(defn shift-date-range
-  [date-range num-days]
-  (map #(.minusDays % num-days) date-range))
-
-(defn shift-date-ranges
-  [date-ranges num-days]
-  (map #(shift-date-range % num-days) date-ranges))
-
-(defn shift-date-ranges-f
-  "Creates a function that shifts date ranges by num-days"
-  [num-days]
-  (fn [date-ranges] (shift-date-ranges date-ranges num-days)))
-
-(def workable-traj-f1 (all-load-traj traj-map1))
-(def date-ranges1 (partition 2 1 (map str-to-date ["2011-07-30" "2011-08-05" "2011-08-10" "2011-08-12"])))
-
-(defn shift
-  "Returns a new loading trajectory shifted in time by num-days"
-  [workable-traj-f num-days]
-  (comp workable-traj-f (shift-date-ranges-f num-days)))
-  
-
 (extend-type SampleWorkable
   Workable
                               
@@ -82,6 +26,13 @@
 
 (def sample-workable (-> (SampleWorkable. "Sample")
                        (set-planned-start-end (str-to-date "2011-07-30") (str-to-date "2011-08-30"))))
+
+(def sw-load-traj (load-traj/make-uniform-load-traj 2.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
+(def qa-load-traj (load-traj/make-uniform-load-traj 1.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
+(def traj-map1 (load-traj/make-composite-uniform-load-traj {"SW" 2.0, "QA" 1.0} (map str-to-date ["2011-07-30" "2011-08-30"])))
+
+(def workable-traj-f1 (load-traj/build-load-traj-f traj-map1))
+(def date-ranges1 (partition 2 1 (map str-to-date ["2011-07-30" "2011-08-05" "2011-08-10" "2011-08-12"])))
 
 (deftest test-duration
   (let [one-day-workable (set-planned-start-end sample-workable (str-to-date "2011-07-30") (str-to-date "2011-07-31"))
