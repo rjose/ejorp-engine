@@ -6,16 +6,19 @@
   (:require [ejorp.util.density-integrals :as density]))
 
 ;; ## Test Data
-;; TODO: Document this
+
+;; #### Dates
 (def aug-5 (str-to-date "2011-08-05"))
 (def aug-10 (str-to-date "2011-08-10"))
 (def aug-13 (str-to-date "2011-08-13"))
 (def aug-16 (str-to-date "2011-08-16"))
 (def aug-25 (str-to-date "2011-08-25"))
 
+;; #### Raw Trajectories
 (def uniform-traj-1 (make-uniform-load-traj 1.0 [aug-10 aug-16]))
 (def uniform-traj-3 (make-uniform-load-traj 3.0 [aug-10 aug-16]))
 
+;; #### Loading Trajectories
 (def rolemap {"SW" uniform-traj-3, "QA" uniform-traj-1})
 (def traj-f (build-load-traj-f rolemap))
 

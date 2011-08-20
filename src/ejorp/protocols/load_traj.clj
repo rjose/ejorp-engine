@@ -9,6 +9,7 @@
 (ns ejorp.protocols.load-traj
   (:use ejorp.util.density-integrals))
 
+;; ## Utility functions
 (defn clamp-date
   "Ensures a `date` is not before `start-date` and not after `end-date`."
   [[start-date end-date] date ]
@@ -27,7 +28,16 @@
       (> d-time e-time) 1.0
       :else (/ (- d-time s-time) (- e-time s-time)))))
 
+;; ## Load Trajectory Functions
+;; "Generic load trajectory function. This is meant to be used with 'partial' to construct trajectory functions"
 
+;; #### load-traj
+;; This is meant to be used with `partial` to construct a trajectory function from
+;; a `density-integral`. This function takes a `start-date` and `end-date` to define
+;; the bounds of the density-integral.
+;;
+;; The `interval` is a seq of the start and end dates for a specific interval. Typically,
+;; this is the argument that the partial should be applied to.
 (defn load-traj
   "Constructs a load-traj function from a density-integral."
   [start-date end-date density-integral interval]
@@ -50,9 +60,12 @@
         traj-f (partial load-traj start-date end-date density-f)]
     traj-f))
 
-; This is a convenience function for initial planning
-(defn make-composite-uniform-load-traj
-  "Constructs a map of roles to uniform load trajectories"
+;; #### uniform-load-traj-rolemap
+;; This is a convenience function that takes a `scale-map` like
+;; `{"SW" 2.0, "QA" 0.5}` and a date-range and returns a map of 
+;; roles to uniform-load-traj functions.
+(defn uniform-load-traj-rolemap
+  "Constructs a map of roles to uniform load-traj functions"
   [scale-map date-range]
   (into {} (map (fn [[role scale]] [role (make-uniform-load-traj scale date-range)]) scale-map)))
 
@@ -71,7 +84,7 @@
       (into {} (map (fn [[role traj-f]] [role (traj-seq traj-f date-ranges)]) rolemap)))))
 
 
-;; Date shift functions
+;; ##Date shift functions
 (defn shift-date-range
   [date-range num-days]
   (map #(.minusDays % num-days) date-range))
