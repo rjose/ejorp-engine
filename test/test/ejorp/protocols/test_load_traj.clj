@@ -5,12 +5,29 @@
   (:use ejorp.protocols.load-traj))
 
 
+(deftest test-clamp-date
+  (is (= aug-13 (clamp-date [aug-13 aug-16] aug-10)))
+  (is (= aug-13 (clamp-date [aug-10 aug-13] aug-16)))
+  (is (= aug-13 (clamp-date [aug-10 aug-16] aug-13))))
+
+(deftest test-fraction-of
+  (is (approx= 0.0 (fraction-of [aug-10 aug-16] aug-10) 0.1))
+  (is (approx= 1.0 (fraction-of [aug-10 aug-16] aug-16) 0.1))
+  (is (approx= 0.5 (fraction-of [aug-10 aug-16] aug-13) 0.1))
+  (is (approx= 0.0 (fraction-of [aug-10 aug-16] aug-5) 0.1))
+  (is (approx= 1.0 (fraction-of [aug-10 aug-16] aug-25) 0.1)))
+
+;; TODO: Test make-uniform-load-traj
+;; TODO: Test build-load-traj-f
+
+;; We're basically testing the construction of load-traj function.
 (deftest test-load-traj
   (let [start-date (str-to-date "2011-08-10")
         end-date (str-to-date "2011-08-16")
         density-f (scale-density-fn 2.5 uniform-density)
         traj-f (partial load-traj start-date end-date density-f)]
     (is (approx= 1.25 (traj-f [start-date (str-to-date "2011-08-13")]) 0.1))))
+
 
 ; TODO: Test other load-traj functions
 ; TODO: Add load-traj to workables

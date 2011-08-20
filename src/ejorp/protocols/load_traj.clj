@@ -1,14 +1,17 @@
 (ns ejorp.protocols.load-traj)
 
 (defn clamp-date
-  [start-date end-date date]
+  "Ensures a `date` is not before `start-date` and not after `end-date`."
+  [[start-date end-date] date ]
   (cond
     (.isBefore date start-date) start-date
     (.isAfter date end-date) end-date
     :else date))
 
 (defn fraction-of
-  [start-date end-date date]
+  "Computes the fraction of the way that `date` is in the range defined 
+  by `start-date` and `end-date. The result is in the set [0.0, 1.0]"
+  [[start-date end-date] date]
   (let [[s-time e-time d-time] (map #(.getMillis %) [start-date end-date date])]
     (cond
       (< d-time s-time) 0.0
@@ -25,12 +28,20 @@
   (fn [s e] (* scale (density-f s e))))
 
 (defn load-traj
-  "Generic load trajectory function. This is meant to be used with 'partial' to construct trajectory functions"
-  [start-date end-date density-f interval-dates]
-  (let [frac (partial fraction-of start-date end-date)
-        [start-frac end-frac] (map frac interval-dates)]
-    (density-f start-frac end-frac)))
+  "Constructs a load-traj function from a density-integral."
+  [start-date end-date density-integral interval]
+  (let [frac (partial fraction-of [start-date end-date])
+        [start-frac end-frac] (map frac interval)]
+    (density-integral start-frac end-frac)))
 
+;; #### make-uniform-load-traj
+;; This is a convenience function that constructs a uniform density integral
+;; over a given period of time. The `scale` argument scales the integral
+;; to that value. For instance 
+;; 
+;; `(make-uniform-load-traj 3 start-date end-date)`
+;; 
+;; will return a load-traj function whose total integrated value would be 3.
 (defn make-uniform-load-traj
   "Constructs a load-traj function with uniform density over a time period"
   [scale [start-date end-date]]

@@ -3,7 +3,8 @@
 
 (defprotocol Workable
   (start-date [workable])
-  (end-date [workable]))
+  (end-date [workable])
+  (loading-traj-f [workable]))
 
 (defn duration
   "Computes the duration of a Workable"
@@ -17,9 +18,10 @@
 (defn fraction-of
   "Returns the fraction that a date is in a workable"
   [workable date]
-  (load-traj/fraction-of (start-date workable) (end-date workable) date))
+  (load-traj/fraction-of [(start-date workable) (end-date workable)] date))
       
 (defn clamp-date
   "This clamps a date to a workable's date range."
   [workable date]
-  (load-traj/clamp-date (start-date workable) (end-date workable) date))
+  (load-traj/clamp-date [(start-date workable) (end-date workable)] date))
+
