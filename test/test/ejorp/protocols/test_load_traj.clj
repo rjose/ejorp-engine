@@ -2,7 +2,8 @@
   (:use clojure.test)
   (:use clojure.contrib.generic.math-functions)  
   (:use ejorp.util.date)
-  (:use ejorp.protocols.load-traj))
+  (:use ejorp.protocols.load-traj)
+  (:require [ejorp.util.density-integrals :as density]))
 
 
 (deftest test-clamp-date
@@ -24,7 +25,7 @@
 (deftest test-load-traj
   (let [start-date (str-to-date "2011-08-10")
         end-date (str-to-date "2011-08-16")
-        density-f (scale-density-fn 2.5 uniform-density)
+        density-f (density/scale-density-integral 2.5 density/uniform-density-integral)
         traj-f (partial load-traj start-date end-date density-f)]
     (is (approx= 1.25 (traj-f [start-date (str-to-date "2011-08-13")]) 0.1))))
 

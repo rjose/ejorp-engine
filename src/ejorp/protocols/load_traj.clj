@@ -1,4 +1,13 @@
-(ns ejorp.protocols.load-traj)
+;; The load-traj module defines functions for creating and manipulating
+;; "load trajectories". These are maps of roles to sequences of effort.
+;; Each effort value corresponds to a specific date range. 
+;; 
+;; Here's an example of a load trajectory:
+;; 
+;; `{"Node Engineer" (0.51 0.97), "QA" (0.08 0.16)}`
+;; 
+(ns ejorp.protocols.load-traj
+  (:use ejorp.util.density-integrals))
 
 (defn clamp-date
   "Ensures a `date` is not before `start-date` and not after `end-date`."
@@ -18,14 +27,6 @@
       (> d-time e-time) 1.0
       :else (/ (- d-time s-time) (- e-time s-time)))))
 
-(defn uniform-density
-  "Returns the cumulative value between two points in [0, 1]"
-  [start end]
-  (- end start))
-
-(defn scale-density-fn
-  [scale density-f]
-  (fn [s e] (* scale (density-f s e))))
 
 (defn load-traj
   "Constructs a load-traj function from a density-integral."
@@ -45,7 +46,7 @@
 (defn make-uniform-load-traj
   "Constructs a load-traj function with uniform density over a time period"
   [scale [start-date end-date]]
-  (let [density-f (scale-density-fn scale uniform-density)
+  (let [density-f (scale-density-integral scale uniform-density-integral)
         traj-f (partial load-traj start-date end-date density-f)]
     traj-f))
 
