@@ -36,11 +36,11 @@
     (density-integral start-frac end-frac)))
 
 ;; #### make-uniform-load-traj
-;; This is a convenience function that constructs a uniform density integral
-;; over a given period of time. The `scale` argument scales the integral
-;; to that value. For instance 
+;; This is a convenience function that constructs a load-traj function based on
+;; a uniform density integral over a given period of time. The `scale` argument 
+;; scales the integral to that value. For instance 
 ;; 
-;; `(make-uniform-load-traj 3 start-date end-date)`
+;; `(make-uniform-load-traj 3 [start-date end-date])`
 ;; 
 ;; will return a load-traj function whose total integrated value would be 3.
 (defn make-uniform-load-traj
@@ -56,16 +56,19 @@
   [scale-map date-range]
   (into {} (map (fn [[role scale]] [role (make-uniform-load-traj scale date-range)]) scale-map)))
 
-(defn traj-seq
-  "Computes a seq of load trajectory values given a load-traj function and a seq of date ranges"
-  [load-traj date-ranges]
-  (map load-traj date-ranges))
-
+;; #### build-load-traj-f
+;; This is a convenience function that allows us to convert a load-traj-rolemap
+;; into a function that takes a seq of date ranges and return a map of
+;; roles to loading values. For instance
+;; 
+;;     `(def traj-f (build-load-traj-f rolemap))`
+;;     `(traj-f date-ranges) => {"Node Engineer" (0.51 0.97), "QA" (0.08 0.16)}`
 (defn build-load-traj-f
   "Builds a function that returns the loading trajectory for all roles"
-  [load-map]
-  (fn [date-ranges]
-    (into {} (map (fn [[role traj-f]] [role (traj-seq traj-f date-ranges)]) load-map))))  
+  [rolemap]
+  (let [traj-seq (fn [load-traj date-ranges] (map load-traj date-ranges))]
+    (fn [date-ranges]
+      (into {} (map (fn [[role traj-f]] [role (traj-seq traj-f date-ranges)]) rolemap)))))
 
 
 ;; Date shift functions
