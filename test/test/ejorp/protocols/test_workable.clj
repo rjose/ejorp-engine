@@ -3,7 +3,7 @@
   (:use clojure.contrib.generic.math-functions)
   (:use ejorp.protocols.workable)  
   (:use ejorp.util.date)
-  (:require [ejorp.protocols.load-traj :as load-traj]))
+  (:require [ejorp.protocols.traj :as traj]))
 
 ;; Create a sample workable
 (defrecord SampleWorkable [name])
@@ -27,11 +27,11 @@
 (def sample-workable (-> (SampleWorkable. "Sample")
                        (set-planned-start-end (str-to-date "2011-07-30") (str-to-date "2011-08-30"))))
 
-(def sw-load-traj (load-traj/make-uniform-load-traj 2.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
-(def qa-load-traj (load-traj/make-uniform-load-traj 1.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
-(def traj-map1 (load-traj/uniform-load-traj-rolemap {"SW" 2.0, "QA" 1.0} (map str-to-date ["2011-07-30" "2011-08-30"])))
+(def sw-load-traj (traj/make-uniform-traj-f 2.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
+(def qa-load-traj (traj/make-uniform-traj-f 1.0 (map str-to-date ["2011-07-30" "2011-08-30"])))
+(def traj-map1 (traj/make-uniform-named-traj-f {"SW" 2.0, "QA" 1.0} (map str-to-date ["2011-07-30" "2011-08-30"])))
 
-(def workable-traj-f1 (load-traj/build-load-traj-f traj-map1))
+(def workable-traj-f1 (traj/make-named-traj-fn traj-map1))
 (def date-ranges1 (partition 2 1 (map str-to-date ["2011-07-30" "2011-08-05" "2011-08-10" "2011-08-12"])))
 
 (deftest test-duration
@@ -66,7 +66,7 @@
 
 ;(deftest test-loading-traj
 ;  (let [date-range1 (map str-to-date ["2011-07-30" "2011-08-15"])
-;        traj (load-traj/load-traj sample-workable [date-range1])
+;        traj (traj/load-traj sample-workable [date-range1])
 ;        node-eng-load (traj "Node Engineer")]
 ;    (is (approx= 0.97 (nth node-eng-load 1) 0.01))))
 
