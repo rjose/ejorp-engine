@@ -8,9 +8,9 @@
 
 (defn uniform-density-integral
   "Returns the cumulative value between two points in [0, 1]"
-  [start end]
+  [[start end]]
   (- end start))
 
 (defn scale-density-integral
   [scale density-integral]
-  (fn [s e] (* scale (density-integral s e))))
+  (fn [frac-range] (* scale (density-integral frac-range))))

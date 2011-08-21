@@ -1,5 +1,5 @@
 (ns ejorp.protocols.workable
-  (:require [ejorp.protocols.load-traj :as load-traj]))
+  (:require [ejorp.protocols.traj :as traj]))
 
 (defprotocol Workable
   (start-date [workable])
@@ -18,10 +18,10 @@
 (defn fraction-of
   "Returns the fraction that a date is in a workable"
   [workable date]
-  (load-traj/fraction-of [(start-date workable) (end-date workable)] date))
+  (traj/fraction-of [(start-date workable) (end-date workable)] date))
       
 (defn clamp-date
   "This clamps a date to a workable's date range."
   [workable date]
-  (load-traj/clamp-date [(start-date workable) (end-date workable)] date))
+  (traj/clamp-date [(start-date workable) (end-date workable)] date))
 

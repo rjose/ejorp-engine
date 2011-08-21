@@ -1,8 +1,8 @@
-(ns test.ejorp.protocols.test-load-traj
+(ns test.ejorp.protocols.test-traj
   (:use clojure.test)
   (:use clojure.contrib.generic.math-functions)  
   (:use ejorp.util.date)
-  (:use ejorp.protocols.load-traj)
+  (:use ejorp.protocols.traj)
   (:require [ejorp.util.density-integrals :as density]))
 
 ;; ## Test Data
@@ -15,12 +15,12 @@
 (def aug-25 (str-to-date "2011-08-25"))
 
 ;; #### Raw Trajectories
-(def uniform-traj-1 (make-uniform-load-traj 1.0 [aug-10 aug-16]))
-(def uniform-traj-3 (make-uniform-load-traj 3.0 [aug-10 aug-16]))
+(def uniform-traj-1 (make-uniform-traj-f 1.0 [aug-10 aug-16]))
+(def uniform-traj-3 (make-uniform-traj-f 3.0 [aug-10 aug-16]))
 
 ;; #### Loading Trajectories
 (def rolemap {"SW" uniform-traj-3, "QA" uniform-traj-1})
-(def traj-f (build-load-traj-f rolemap))
+(def traj-f (make-named-traj-fn rolemap))
 
 
 ;; ## Utility Functions
@@ -41,16 +41,16 @@
 ;; We're basically testing the construction of load-traj function.
 (deftest test-load-traj
   (let [density-f (density/scale-density-integral 2.5 density/uniform-density-integral)
-        load-traj-f (partial load-traj aug-10 aug-16 density-f)]
-    (is (approx= 1.25 (load-traj-f [aug-10 aug-13]) 0.1))))
+        load-traj-f (make-traj-f [aug-10 aug-16] density-f)]
+    (is (approx= 1.25 (first (load-traj-f [[aug-10 aug-13]])) 0.1))))
 
-(deftest test-make-uniform-load-traj
-  (is (approx= 3.0 (uniform-traj-3 [aug-10 aug-16]) 0.1))
-  (is (approx= 1.5 (uniform-traj-3 [aug-10 aug-13]) 0.1))
-  (is (approx= 0.0 (uniform-traj-3 [aug-5 aug-10]) 0.1))
-  (is (approx= 0.0 (uniform-traj-3 [aug-16 aug-25]) 0.1)))
+(deftest test-make-uniform-named-traj-f
+  (is (approx= 3.0 (first (uniform-traj-3 [[aug-10 aug-16]])) 0.1))
+  (is (approx= 1.5 (first (uniform-traj-3 [[aug-10 aug-13]])) 0.1))
+  (is (approx= 0.0 (first (uniform-traj-3 [[aug-5 aug-10]])) 0.1))
+  (is (approx= 0.0 (first (uniform-traj-3 [[aug-16 aug-25]])) 0.1)))
   
-(deftest test-build-load-traj-f
+(deftest test-make-named-traj-fn
   (let [results (traj-f [[aug-10 aug-13]])]
     (is (approx= 1.5 (first (results "SW")) 0.1))
     (is (approx= 0.5 (first (results "QA")) 0.1))))

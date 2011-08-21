@@ -1,6 +1,5 @@
 (ns ejorp.reports.loading
   (:use ejorp.nouns.project, ejorp.nouns.team, ejorp.nouns.person)
-  (:require [ejorp.protocols.load-traj :as load-traj])
   (:require [ejorp.util.density-integrals :as density])
   (:require [ejorp.protocols.workable :as workable])
   (:use clojure.set))
@@ -18,7 +17,7 @@
   (let [density-f density/uniform-density-integral
         total-role-loading ((:est-load proj) role)
         date-ranges-as-fractions (for [r date-ranges]  (map (partial workable/fraction-of proj) r))
-        normalized-values (for [r date-ranges-as-fractions] (apply density-f r))]
+        normalized-values (for [r date-ranges-as-fractions] (density-f r))]
     (map #(* total-role-loading %) normalized-values)))
 
 
