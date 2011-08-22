@@ -81,22 +81,38 @@
     (into {} (map (fn [[role traj-f]] [role (traj-f date-ranges)]) named-traj-f))))
 
 ;; ##Date shift functions
+
+;; #### shift-date-range
+;; This shifts a date range by some number of days. We shift the date range
+;; into the past because the common use case is to shift trajectories "forward".
+;; Shifting trajectories forward moves dates backward relative to the original
+;; traj-f functions.
 (defn shift-date-range
+  "Shifts a date-range into the past"
   [date-range num-days]
   (map #(.minusDays % num-days) date-range))
 
 (defn shift-date-ranges
+  "Shifts a set of date ranges into the past"
   [date-ranges num-days]
   (map #(shift-date-range % num-days) date-ranges))
 
+
+;; #### shift-date-ranges-f
+;; This function is useful for composing with existing functions that take
+;; date-ranges since it allows us to effectively shift these functions in time.
 (defn shift-date-ranges-f
   "Creates a function that shifts date ranges by num-days"
   [num-days]
   (fn [date-ranges] (shift-date-ranges date-ranges num-days)))
 
+;; #### shift-traj-f
+;; This shifts a traj-f function forward in time by num-days.
+;; The intent is to do things like move a project back and forth
+;; by some number of days without having to recompute the traj-f function.
 (defn shift-traj-f
-  "Returns a new loading trajectory shifted in time by num-days"
-  [workable-traj-f num-days]
-  (comp workable-traj-f (shift-date-ranges-f num-days)))
+  "Returns a new traj-f shifted in time by num-days"
+  [traj-f num-days]
+  (comp traj-f (shift-date-ranges-f num-days)))
 
 

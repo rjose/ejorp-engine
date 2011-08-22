@@ -9,15 +9,16 @@
 ;; Here are the test fixtures shared between tests. They're convenient to have here
 ;; for experimenting in the repl.
 
-;; #### Dates
 ;; All dates use `joda-time` to do date computation. Use `str-to-date` to create them.
 (def aug-5 (str-to-date "2011-08-05"))
+(def aug-8 (str-to-date "2011-08-08"))
 (def aug-10 (str-to-date "2011-08-10"))
+(def aug-11 (str-to-date "2011-08-11"))
 (def aug-13 (str-to-date "2011-08-13"))
+(def aug-15 (str-to-date "2011-08-15"))
 (def aug-16 (str-to-date "2011-08-16"))
 (def aug-25 (str-to-date "2011-08-25"))
 
-;; #### Trajectory Functions
 ;; Here are some uniform `traj-f` functions that have uniform density functions
 ;; of different scales.
 (def uniform-traj-1 (make-uniform-traj-f 1.0 [aug-10 aug-16]))
@@ -27,6 +28,7 @@
 ;; sequences.
 (def named-traj-f {"SW" uniform-traj-3, "QA" uniform-traj-1})
 (def named-traj-fn (make-named-traj-fn named-traj-f))
+
 
 ;; ### Tests
 ;; This first set of tests exercises the `clamp-date` functions.
@@ -63,3 +65,24 @@
   (let [results (named-traj-fn [[aug-10 aug-13]])]
     (is (approx= 1.5 (first (results "SW")) 0.1))
     (is (approx= 0.5 (first (results "QA")) 0.1))))
+
+;; Shifting a date range by x days returns a new date range shifted x days into the past.
+(deftest test-shift-date-range
+  (is (= [aug-5 aug-10] (shift-date-range [aug-10 aug-15] 5))))
+
+;; This tests shifting date-ranges in time.
+(deftest test-shift-date-ranges
+  (is (= [[aug-5 aug-10] [aug-8 aug-11]] (shift-date-ranges [[aug-10 aug-15] [aug-13 aug-16]] 5))))
+
+;; This tests the shifting of a traj-f in time. Note that while the original intent
+;; of shift-traj-f was to literally shift traj-f functions in time, it can
+;; correctly shift any function of date-ranges in time. In this case, we're shifting
+;; a named-traj-fn in time.
+(deftest test-shift-traj-f
+  (let [ranges1 [[aug-10 aug-16]]
+        named-traj-shifted-0 ((shift-traj-f named-traj-fn 0) ranges1)
+        named-traj-shifted-3 ((shift-traj-f named-traj-fn 3) ranges1)
+        named-traj-shifted-6 ((shift-traj-f named-traj-fn 6) ranges1)]
+    (is (= {"SW" [3.0], "QA" [1.0]} named-traj-shifted-0))
+    (is (= {"SW" [1.5], "QA" [0.5]} named-traj-shifted-3))
+    (is (= {"SW" [0.0], "QA" [0.0]} named-traj-shifted-6))))
