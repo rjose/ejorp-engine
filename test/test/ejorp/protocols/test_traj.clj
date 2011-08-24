@@ -28,7 +28,8 @@
 ;; sequences.
 (def named-traj-f {"SW" uniform-traj-3, "QA" uniform-traj-1})
 (def named-traj-fn (make-named-traj-fn named-traj-f))
-
+(def named-traj1 {"SW" [1.0 2.0 3.0 1.0], "QA" [0.0 0.0 0.5 0.5]})
+(def named-traj2 {"SW" [1.0 1.0 1.0 1.0], "QA" [0.5 0.5 0.5 0.5]})
 
 ;; ### Tests
 ;; This first set of tests exercises the `clamp-date` functions.
@@ -86,3 +87,22 @@
     (is (= {"SW" [3.0], "QA" [1.0]} named-traj-shifted-0))
     (is (= {"SW" [1.5], "QA" [0.5]} named-traj-shifted-3))
     (is (= {"SW" [0.0], "QA" [0.0]} named-traj-shifted-6))))
+
+;; This tests the basics of summing a set of trajs.
+(deftest test-sum-traj
+  (let [traj1 [1.0 2.0 3.0 4.0]
+        traj2 [1.0 1.0 1.0 1.0]
+        traj3 [2.0 4.0 6.0 0.0]]
+    (is (= [2.0 3.0 4.0 5.0] (sum-traj traj1 traj2)))
+    (is (= [4.0 7.0 10.0 5.0] (sum-traj traj1 traj2 traj3)))
+    (is (= traj1 (sum-traj traj1)))
+    (is (= [] (sum-traj)))))
+
+;; This tests the various cases for summing named-trajs.
+(deftest test-sum-named-traj
+  (let [named-traj3 {"PM" [0.2 0.2 0.2 0.2]}
+        named-traj4 {}]
+    (is (= {"SW" [2.0 3.0 4.0 2.0], "QA" [0.5 0.5 1.0 1.0]} (sum-named-traj named-traj1 named-traj2)))
+    (is (= {"SW" [1.0 2.0 3.0 1.0], "QA" [0.0 0.0 0.5 0.5], "PM" [0.2 0.2 0.2 0.2]} 
+           (sum-named-traj named-traj1 named-traj3)))
+    (is (= {} (sum-named-traj)))))

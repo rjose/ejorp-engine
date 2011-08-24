@@ -116,3 +116,18 @@
   (comp traj-f (shift-date-ranges-f num-days)))
 
 
+;; #### sum-traj
+;; This sums a set of trajs, returning a new traj. We assume that
+;; all trajs are the same length and are associated with the same
+;; date ranges.
+(defn sum-traj
+  "Returns the sum of traj's"
+  [& trajs]
+  (if (pos? (count trajs)) (apply map + trajs) []))
+
+;; #### sum-named-traj
+;; This is the named version of sum-traj. 
+(defn sum-named-traj
+  "Returns the sum of named-traj's"
+  [& named-trajs]
+  (if (pos? (count named-trajs)) (apply merge-with sum-traj named-trajs) {}))
