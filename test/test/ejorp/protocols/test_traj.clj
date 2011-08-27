@@ -31,6 +31,10 @@
 (def named-traj1 {"SW" [1.0 2.0 3.0 1.0], "QA" [0.0 0.0 0.5 0.5]})
 (def named-traj2 {"SW" [1.0 1.0 1.0 1.0], "QA" [0.5 0.5 0.5 0.5]})
 
+;; This is effort data that can be used for constructing a traj-f
+(def effort-data1 {:start-date aug-8, :values [1 2 3 4 5 5 4 3 2 1]})
+(def effort-data2 {:start-date aug-16, :values [3 2]})
+
 ;; ### Tests
 ;; This first set of tests exercises the `clamp-date` functions.
 (deftest test-clamp-date
@@ -50,7 +54,7 @@
 ;; Here, we're basically testing the construction of load-traj function.
 (deftest test-load-traj
   (let [density-f (density/scale-density-integral 2.5 density/uniform-density-integral)
-        load-traj-f (make-traj-f [aug-10 aug-16] density-f)]
+        load-traj-f (density-integral-to-traj-f [aug-10 aug-16] density-f)]
     (is (approx= 1.25 (first (load-traj-f [[aug-10 aug-13]])) 0.1))))
 
 ;; Building uniform-named-traj-f is the starting point for doing any
@@ -106,3 +110,23 @@
     (is (= {"SW" [1.0 2.0 3.0 1.0], "QA" [0.0 0.0 0.5 0.5], "PM" [0.2 0.2 0.2 0.2]} 
            (sum-named-traj named-traj1 named-traj3)))
     (is (= {} (sum-named-traj)))))
+
+;; This tests that we can make a traj-fn. This is a component used in the
+;; `effort-data-to-traj-f` function.
+(deftest test-make-traj-fn
+  (let [traj-fn (make-traj-fn aug-8 [1 2 3 4 5 5 4 3 2 1 ])]
+    (is (= 0 (traj-fn [aug-5 aug-8])))
+    (is (= 3 (traj-fn [aug-8 aug-10])))
+    (is (= 24 (traj-fn [aug-10 aug-16]))) 
+    (is (= 0 (traj-fn [aug-10 aug-10])))
+    ))
+
+;; This demonstrates how to create a traj-f from data.
+(deftest test-effort-data-to-traj-f
+  (let [my-traj-f (effort-data-to-traj-f effort-data1)]
+    (is (= [0 3 24] (my-traj-f [[aug-5 aug-8] [aug-8 aug-10] [aug-10 aug-16]])))))
+
+;; This exercises the named version of creating a traj-f from data
+(deftest test-effort-data-to-named-traj-f
+  (let [my-named-traj-f (effort-data-to-named-traj-f {"SW" effort-data1, "QA" effort-data2})]
+    (is (= {"SW" [24], "QA" [0]} (my-named-traj-f [[aug-10 aug-16]])))))

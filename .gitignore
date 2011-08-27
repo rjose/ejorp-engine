@@ -4,4 +4,4 @@ docs/uberdoc.html
 .lein-failures
 *.class
 *.jar
-test/test/ejorp/protocols/.test_traj.clj.swp
+*.swp
