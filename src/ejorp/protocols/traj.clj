@@ -16,9 +16,8 @@
   (:use ejorp.util.date))
 
 ;; ## Utility functions
-;; These are various utility functions that apply to traj functions.
-;; We may move them to a more general place if other modules need
-;; them as well.
+;; These are various utility functions that apply to traj functions.  We may
+;; move them to a more general place if other modules need them as well.
 (defn- clamp 
   "Clamps a value to be within the given range"
   [x min max] 
@@ -45,8 +44,8 @@
 ;; ## Trajectory Functions
 
 ;; #### density-integral-to-traj-f
-;; This constructs a traj-f from a density integral.
-;; The `start-date` and `end-date` define the total range of this function.
+;; This constructs a traj-f from a density integral.  The `start-date` and
+;; `end-date` define the total range of this function.
 (defn density-integral-to-traj-f
   "Constructs a traj-f from a density integral."
   [[start-date end-date] density-integral]
@@ -56,9 +55,9 @@
       (map density-integral frac-ranges))))
 
 ;; #### make-uniform-traj-f
-;; This is a convenience function that constructs a traj-f based on
-;; a uniform density integral over a given period of time. The `scale` argument 
-;; scales the integral. For instance 
+;; This is a convenience function that constructs a traj-f based on a uniform
+;; density integral over a given period of time. The `scale` argument scales
+;; the integral. For instance 
 ;; 
 ;; `(make-uniform-traj-f 3 [start-date end-date])`
 ;; 
@@ -81,8 +80,8 @@
 
 
 ;; #### make-named-traj-fn
-;; This creates a function that can be applied to a seq of date ranges 
-;; to return the associated a named-traj.
+;; This creates a function that can be applied to a seq of date ranges to
+;; return the associated a named-traj.
 (defn make-named-traj-fn
   "Builds a function that returns the loading trajectory for all roles"
   [named-traj-f]
@@ -93,9 +92,9 @@
 
 ;; #### shift-date-range
 ;; This shifts a date range by some number of days. We shift the date range
-;; into the past because the common use case is to shift trajectories "forward".
-;; Shifting trajectories forward moves dates backward relative to the original
-;; traj-f functions.
+;; into the past because the common use case is to shift trajectories
+;; "forward".  Shifting trajectories forward moves dates backward relative to
+;; the original traj-f functions.
 (defn shift-date-range
   "Shifts a date-range into the past"
   [date-range num-days]
@@ -116,9 +115,9 @@
   (fn [date-ranges] (shift-date-ranges date-ranges num-days)))
 
 ;; #### shift-traj-f
-;; This shifts a traj-f function forward in time by num-days.
-;; The intent is to do things like move a project back and forth
-;; by some number of days without having to recompute the traj-f function.
+;; This shifts a traj-f function forward in time by num-days.  The intent is to
+;; do things like move a project back and forth by some number of days without
+;; having to recompute the traj-f function.
 (defn shift-traj-f
   "Returns a new traj-f shifted in time by num-days"
   [traj-f num-days]
@@ -126,9 +125,8 @@
 
 
 ;; #### sum-traj
-;; This sums a set of trajs, returning a new traj. We assume that
-;; all trajs are the same length and are associated with the same
-;; date ranges.
+;; This sums a set of trajs, returning a new traj. We assume that all trajs are
+;; the same length and are associated with the same date ranges.
 (defn sum-traj
   "Returns the sum of traj's"
   [& trajs]
@@ -142,14 +140,14 @@
   (if (pos? (count named-trajs)) (apply merge-with sum-traj named-trajs) {}))
 
 ;; #### make-traj-fn
-;; This is used to construct a function that can be used to generate traj's from
-;; effort data. The `start-bound-date` is the reference date for this function
-;; and is associated with the first value in `values`. The `values` vec contains
-;; effort info for each consecutive day after `start-bound-date`
+;; This is used to construct a function that can be used to generate traj's
+;; from effort data. The `start-bound-date` is the reference date for this
+;; function and is associated with the first value in `values`. The `values`
+;; vec contains effort info for each consecutive day after `start-bound-date`
 ;;
-;; This returns a function that takes a date range and returns the sum of the 
-;; efforts within that range. The range includes the start but not the end, i.e.,
-;; it looks like this: [s-date, e-date).
+;; This returns a function that takes a date range and returns the sum of the
+;; efforts within that range. The range includes the start but not the end,
+;; i.e., it looks like this: [s-date, e-date).
 (defn make-traj-fn
   "Returns a traj-fn that can be applied to a seq of date-ranges to product a traj"
   [start-bound-date values]
@@ -174,8 +172,8 @@
       (map traj-fn date-ranges)))) 
 
 ;; #### effort-data-to-named-traj-f
-;; This takes effort data in the form of a `named-effort-map` and returns a 
-;; a named-traj-fn based on it. The effort map looks like this:
+;; This takes effort data in the form of a `named-effort-map` and returns a a
+;; named-traj-fn based on it. The effort map looks like this:
 ;;
 ;;   `{"SW" {:start-date (str-to-date "2011-08-22"), :values [1 2 3 4 5 5 4 3 2 1 ]}}`
 (defn effort-data-to-named-traj-f
