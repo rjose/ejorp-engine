@@ -29,20 +29,18 @@
 (defn clamp-date
   "Ensures a `date` is not before `start-date` and not after `end-date`."
   [[start-date end-date] date ]
-  (cond
-    (.isBefore date start-date) start-date
-    (.isAfter date end-date) end-date
-    :else date))
+  (cond (.isBefore date start-date) start-date
+        (.isAfter date end-date) end-date
+        :else date))
 
 (defn fraction-of
   "Computes the fraction of the way that `date` is in the range defined 
   by `start-date` and `end-date. The result is in the set [0.0, 1.0]"
   [[start-date end-date] date]
   (let [[s-time e-time d-time] (map #(.getMillis %) [start-date end-date date])]
-    (cond
-      (< d-time s-time) 0.0
-      (> d-time e-time) 1.0
-      :else (/ (- d-time s-time) (- e-time s-time)))))
+    (cond (< d-time s-time) 0.0
+          (> d-time e-time) 1.0
+          :else (/ (- d-time s-time) (- e-time s-time)))))
 
 ;; ## Trajectory Functions
 
