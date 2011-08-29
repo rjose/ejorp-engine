@@ -24,5 +24,5 @@ end
 
 def test_stuff
   match_testing(`lein test`)
-  puts "======================="
+  puts "#{Time.now.strftime("%I:%M %p")} ======================="
 end
