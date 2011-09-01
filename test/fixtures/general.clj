@@ -13,17 +13,22 @@
 (def empty-sw-team (Team. 10 "SW Team"))
 (def sw-team (add-members empty-sw-team [rino "Node Engineer"] [roland "Warblade Knight"] [james "Node Engineer"]))
 
+(def jul15 (str-to-date "2011-07-15"))
+(def jul31 (str-to-date "2011-07-31"))
+(def oct30 (str-to-date "2011-10-30"))
+(def nov30 (str-to-date "2011-11-30"))
 
 ;; TODO: We may need to rewrite these in the face of the new workable changes
-(def jupiter (-> (Project. 1000 "Jupiter")
-                   (set-planned-start-end (str-to-date "2011-07-31") (str-to-date "2011-10-30"))
-                   (add-resource-req {"Node Engineer" 1.5, "QA" 0.25})))
+(def jupiter (-> (Project. 1000 "Jupiter" (ref {}) (ref {}))
+               (add-resource-req {"Node Engineer" 1.5, "QA" 0.25})))
+(dosync (workable/set-dates jupiter :planned [jul31 oct30]))
 
-(def neptune (-> (Project. 1001 "Neptune")
-                   (set-planned-start-end (str-to-date "2011-07-15") (str-to-date "2011-11-30"))
-                   (add-resource-req {"Node Engineer" 2.5, "QA" 0.5, "Warblade Knight" 1.0})))
+(def neptune (-> (Project. 1001 "Neptune" (ref {}) (ref {}))
+               (add-resource-req {"Node Engineer" 2.5, "QA" 0.5, "Warblade Knight" 1.0})))
+(dosync (workable/set-dates neptune :planned [jul15 nov30]))
 
-; (def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
+(def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
+
 ;; ## Date Ranges
 (def ranges1 (partition 2 (map str-to-date ["2011-08-01" "2011-09-01", "2011-09-01" "2011-10-30"])))
 
