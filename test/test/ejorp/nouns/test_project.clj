@@ -29,7 +29,7 @@
 
 ;; ## Loading Estimates
 (deftest test-loading-estimates
-  (let [proj1 (Project. 1000 "Project 1")
+  (let [proj1 (Project. 1000 "Project 1" (ref {}) (ref {}))
         proj2 (add-resource-req proj1 {"Node Engineer" 1.5})
         proj3 (add-resource-req proj2 {"QA" 0.25})
         proj4 (clear-resource-req proj3 "QA")]
@@ -44,7 +44,7 @@
 ;; ## Load Computation
 (deftest test-loading-computation
   (let [loading (project-role-loading jupiter "QA" ranges1)]
-    (is (approx= 0.085 (nth loading 0) 0.01))
+    (is (approx= 0.068 (nth loading 0) 0.01))
     (is (approx= 0.16 (nth loading 1) 0.01))))
 
 
@@ -58,9 +58,9 @@
 ;; ## Shifting projects
 (deftest test-shift-project
   (let [num-days 7
-        shifted-proj (shift-project jupiter num-days)
-        orig-dates (:planned-dates jupiter)
-        new-dates (:planned-dates shifted-proj)]
-    (is (= (:start new-dates) (.plusDays (:start orig-dates) num-days)))
-    (is (= (:end new-dates) (.plusDays (:end orig-dates) num-days)))))
-    
+        orig-dates (workable/get-dates jupiter :planned)]
+    (do
+      (dosync (shift-project jupiter num-days))
+      (let [new-dates (workable/get-dates jupiter :planned)]
+        (is (= (first new-dates) (.plusDays (first orig-dates) num-days)))
+        (is (= (last new-dates) (.plusDays (last orig-dates) num-days)))))))

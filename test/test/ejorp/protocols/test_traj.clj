@@ -63,6 +63,8 @@
   (is (approx= 3.0 (first (uniform-traj-3 [[aug-10 aug-16]])) 0.1))
   (is (approx= 1.5 (first (uniform-traj-3 [[aug-10 aug-13]])) 0.1))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-5 aug-10]])) 0.1))
+  (is (= 0 (first (uniform-traj-3 [[aug-10 aug-10]]))))
+;  (is (= 0 (first (uniform-traj-3 [[aug-10 aug-11]]))))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-16 aug-25]])) 0.1)))
   
 ;; The `named-traj-fn` will be the workhouse of any project loading computations.
