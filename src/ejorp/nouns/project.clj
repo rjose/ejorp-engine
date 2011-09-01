@@ -1,18 +1,24 @@
 (ns ejorp.nouns.project
   (:use [ejorp.protocols.workable :as workable]))
 
-;; A project may be created without too much detail. Initially, only the name and 
-;; and the start/end dates are needed. As projects are started and tasks added,
-;; more detail will be added to each project.
-;; 
-;; We still need to understand how to presist projects (as well as other things
-;; that can have varying amounts of data in them)
+;; A project may be created without too much detail. Aside from the name and id, the
+;; interesting pieces are the `date-map-ref` and the `named-traj-map-ref`. These
+;; ref items will be maps that we can persist in a database. We'll use these refs in the
+;; same way: we'll set and get data with a keyword.
+;;
+;; Actually, since this is generic enough that these functions are defined in the workable
+;; protocol.
 (defrecord Project [id name date-map-ref named-traj-map-ref])
 
-;; ## Resource Requirements
-;; The following functions allow us to update load estimates for projects. The units
-;; of load are full-time-equivalents (FTE) for the life of a project.
+;; Project's implement the `Workable` protocol
+(extend-type Project
+  workable/Workable
+  (date-map-ref [w] (:date-map-ref w))
+  (named-traj-map-ref [w] (:named-traj-map-ref w)))
+
 ; TODO: Make this follow the same pattern as traj-f's and dates
+; TODO: Move this function to the workable protocol and rework it so that it
+; uses a uniform distribution by default or can take a density integral
 (defn add-resource-req
   "Specifies load estimates for a project"
   [project load]
@@ -33,29 +39,12 @@
   [proj]
   (keys (:est-load proj)))
 
-;; TODO: Revise this given the new functions for shifting workables. In particular, shifting a project
-;; should also shift the project's load trajectories
-
-;; ## Shifting projects
-;(defn shift-project
-;  [proj num-days]
-;  (let [new-dates (into {} (map (fn [[k v]] [k (.plusDays v num-days)]) (:planned-dates proj)))]
-;    (assoc proj :planned-dates new-dates)))
-  
+; TODO: Revise this given the new functions for shifting workables. In particular, shifting a project
+; should also shift the project's load trajectories
+; We should also make a distinction between really shifting a project and shifting it for argument's sake
 (defn shift-project
   [proj num-days]
   (let [new-dates (map #(.plusDays % num-days) (workable/get-dates proj :planned))]
     (workable/set-dates proj :planned new-dates)))
 
-;(defn set-planned-start-end
-;    [proj start end]
-;    (let [planned-dates (assoc (:planned-dates proj) :start start :end end)]
-;      (assoc proj :planned-dates planned-dates)))    
-  
-
-;; ## Workable Protocol
-(extend-type Project
-  workable/Workable
-  (date-map-ref [w] (:date-map-ref w))
-  (named-traj-map-ref [w] (:named-traj-map-ref w)))
 

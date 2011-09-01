@@ -6,7 +6,7 @@
   (:require [ejorp.protocols.traj :as traj])
 )
 
-;; Create a sample workable
+;; ## Fixtures
 (defrecord SampleWorkable [name date-map-ref named-traj-map-ref])
 
 (extend-type SampleWorkable
@@ -27,10 +27,9 @@
 
 (def date-ranges1 (partition 2 1 (map str-to-date ["2011-07-30" "2011-08-05" "2011-08-10" "2011-08-12"])))
 
+;; ## Tests
 (deftest test-duration
   (is (= 31 (workable/duration w1))))
-
-(dosync (workable/set-named-traj-fn w1 :planned-by-role workable-traj-fn1))
 
 (deftest test-get-planned-trajectory
   (let [role-traj-fn (workable/named-traj-fn w1 :planned-by-role)]
