@@ -8,13 +8,13 @@
 ;;
 ;; Actually, since this is generic enough that these functions are defined in the workable
 ;; protocol.
-(defrecord Project [id name date-map-ref named-traj-map-ref])
+(defrecord Project [id name date-map named-traj-map])
 
 ;; Project's implement the `Workable` protocol
 (extend-type Project
   workable/Workable
-  (date-map-ref [w] (:date-map-ref w))
-  (named-traj-map-ref [w] (:named-traj-map-ref w)))
+  (date-map [w] (:date-map w))
+  (named-traj-map [w] (:named-traj-map w)))
 
 ; TODO: Make this follow the same pattern as traj-f's and dates
 ; TODO: Move this function to the workable protocol and rework it so that it
