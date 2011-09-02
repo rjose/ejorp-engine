@@ -9,7 +9,7 @@
   (named-traj-map [w]))
 
 ;; #### set-dates
-;; This basically updates the date-map-ref for a workable to have a new set of dates.
+;; This basically updates the date-map for a workable to have a new set of dates.
 ;; Usually, `dates` come in pairs (a start and an end). However, there can be an
 ;; arbitrary number of them. We have the following conventions:
 ;;
@@ -32,7 +32,7 @@
   (k (date-map w)))
 
 ;; #### duration
-;; This returns the duration in days of a workable. The key `k` is associated with the `date-map-ref` keys.
+;; This returns the duration in days of a workable. The key `k` is associated with the `date-map` keys.
 ;; If the key is not present, we default to `:planned` dates.
 (defn duration
   "Computes the duration of a w"
