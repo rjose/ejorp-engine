@@ -5,12 +5,11 @@
 ;; is based on getting refs to date-maps and named-traj-maps. The named-traj-maps
 ;; can be used in the `traj` library.
 (defprotocol Workable
-  (date-map-ref [w])
-  (named-traj-map-ref [w])
-  (traj-map-ref [w]))
+  (date-map [w])
+  (named-traj-map [w]))
 
 ;; #### set-dates
-;; This basically updates the date-map-ref for a workable to have a new set of dates.
+;; This basically updates the date-map for a workable to have a new set of dates.
 ;; Usually, `dates` come in pairs (a start and an end). However, there can be an
 ;; arbitrary number of them. We have the following conventions:
 ;;
@@ -22,26 +21,24 @@
 (defn set-dates
   "This sets the dates for a workable for a given key `k`"
   [w k dates]
-  (let [my-ref (date-map-ref w)
-        new-map (assoc @my-ref k dates)]
-    (ref-set my-ref new-map)))
+  (let [new-date-map (assoc (date-map w) k dates)]
+    (assoc w :date-map new-date-map)))
 
 ;; #### get-dates
 ;; This is the getter for dates by key.
 (defn get-dates
   "This gets the dates for a given key `k`"
   [w k]
-  (k @(date-map-ref w)))
+  (k (date-map w)))
 
 ;; #### duration
-;; This returns the duration in days of a workable. The key `k` is associated with the `date-map-ref` keys.
+;; This returns the duration in days of a workable. The key `k` is associated with the `date-map` keys.
 ;; If the key is not present, we default to `:planned` dates.
 (defn duration
   "Computes the duration of a w"
   [w & k]
   (let [my-k (if k (first k) :planned)
-        date-map (deref (date-map-ref w))
-        dates (my-k date-map)
+        dates (my-k (date-map w))
         start-date (first dates)
         end-date (last dates)]
     (if (or (nil? start-date) (nil? end-date))
@@ -59,7 +56,7 @@
 (defn fraction-of
   "Returns the fraction that a date is in a workable"
   [workable date]
-  (let [date-map (deref (date-map-ref workable))
+  (let [date-map (date-map workable)
         [start-date end-date] (:planned date-map)]
     (traj/fraction-of [start-date end-date] date)))
 
@@ -69,16 +66,9 @@
 (defn clamp-date
   "This clamps a date to a workable's date range."
   [workable date]
-  (let [date-map (deref (date-map-ref workable))
+  (let [date-map (date-map workable)
         [start-date end-date] (:planned date-map)]
     (traj/clamp-date [start-date end-date] date)))
-
-;; #### null-traj-f
-;; This just returns a zero trajectory.
-(defn null-traj-f
-  "This takes a seq of date ranges and returns 0 for each one"
-  [date-ranges]
-  (map (fn [_] 0) date-ranges))
 
 ;; #### null-named-traj-fn
 ;; This just returns an empty map.
@@ -99,28 +89,15 @@
 (defn set-named-traj-fn
   "Sets one of the named-traj-fn's for a w"
   [w k f]
-  (let [traj-map-ref (named-traj-map-ref w)
-        new-traj-map (assoc @traj-map-ref k f)]
-    (ref-set traj-map-ref new-traj-map)))
-
-; TODO: Add set-traj-f as well
-
-;; #### traj-f
-;; This returns a particular traj-f for a given key `k`.
-(defn traj-f
-  "Returns the traj-f associated with a particular key `k` for a workable"
-  [workable k]
-  (let [traj-f (k (:traj-f workable))]
-    (if traj-f
-      traj-f
-      null-traj-f)))
+  (let [new-traj-map (assoc (named-traj-map w) k f)]
+    (assoc w :named-traj-map new-traj-map)))
 
 ;; #### named-traj-fn
 ;; This returns a named-traj-fn for a particular key `k`.
 (defn named-traj-fn
   "Returns the named-traj-fn associated with a particular key `k` for a workable"
   [workable k]
-  (let [named-traj-fn (k (deref (named-traj-map-ref workable)))]
+  (let [named-traj-fn (k (named-traj-map workable))]
     (if named-traj-fn 
       named-traj-fn
       null-named-traj-fn)))

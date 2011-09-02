@@ -1,20 +1,17 @@
 (ns ejorp.nouns.project
   (:use [ejorp.protocols.workable :as workable]))
 
-;; A project may be created without too much detail. Aside from the name and id, the
-;; interesting pieces are the `date-map-ref` and the `named-traj-map-ref`. These
-;; ref items will be maps that we can persist in a database. We'll use these refs in the
-;; same way: we'll set and get data with a keyword.
-;;
-;; Actually, since this is generic enough that these functions are defined in the workable
-;; protocol.
-(defrecord Project [id name date-map-ref named-traj-map-ref])
+;; A project may be created without too much detail. Aside from the name and
+;; id, the interesting pieces are the `date-map` and the `named-traj-map`.
+;; These will be maps that we can persist in a database. We'll use these in the
+;; same way: set and get by keyword.
+(defrecord Project [id name date-map named-traj-map])
 
 ;; Project's implement the `Workable` protocol
 (extend-type Project
   workable/Workable
-  (date-map-ref [w] (:date-map-ref w))
-  (named-traj-map-ref [w] (:named-traj-map-ref w)))
+  (date-map [w] (:date-map w))
+  (named-traj-map [w] (:named-traj-map w)))
 
 ; TODO: Make this follow the same pattern as traj-f's and dates
 ; TODO: Move this function to the workable protocol and rework it so that it

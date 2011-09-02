@@ -19,13 +19,15 @@
 (def nov30 (str-to-date "2011-11-30"))
 
 ;; TODO: We may need to rewrite these in the face of the new workable changes
-(def jupiter (-> (Project. 1000 "Jupiter" (ref {}) (ref {}))
-               (add-resource-req {"Node Engineer" 1.5, "QA" 0.25})))
-(dosync (workable/set-dates jupiter :planned [jul31 oct30]))
+(def jupiter (-> (Project. 1000 "Jupiter" {} {})
+               (add-resource-req {"Node Engineer" 1.5, "QA" 0.25})
+               (workable/set-dates :planned [jul31 oct30])))
 
-(def neptune (-> (Project. 1001 "Neptune" (ref {}) (ref {}))
-               (add-resource-req {"Node Engineer" 2.5, "QA" 0.5, "Warblade Knight" 1.0})))
-(dosync (workable/set-dates neptune :planned [jul15 nov30]))
+
+(def neptune (-> (Project. 1001 "Neptune" {} {})
+               (add-resource-req {"Node Engineer" 2.5, "QA" 0.5, "Warblade Knight" 1.0})
+               (workable/set-dates :planned [jul15 nov30])))
+
 
 (def ranges-1 [[(str-to-date "2011-08-01") (str-to-date "2011-09-01")] [(str-to-date "2011-09-01") (str-to-date "2011-10-30")]])
 

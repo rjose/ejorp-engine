@@ -9,5 +9,5 @@
         node-avail (avail "Node Engineer")
         warblade-avail (avail "Warblade Knight")
         ]
-    (is (approx= 1.59 (first node-avail) 0.01))
+    (is (approx= 1.49 (first node-avail) 0.01))
     (is (approx= 1.0 (first warblade-avail) 0.01))))
