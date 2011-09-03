@@ -92,6 +92,26 @@
   (let [new-traj-map (assoc (named-traj-f w) k f)]
     (assoc w :named-traj-f new-traj-map)))
 
+;; #### add-traj-f
+;; This allows us to add a traj-f to a named-traj-f for a given key.
+(defn add-traj-f
+  "Adds a traj-f to a named-traj-f for a workable"
+  [w k f]
+  (let [my-named-traj-f (k (named-traj-f w))]
+    (set-named-traj-f w k (merge my-named-traj-f f))))
+
+;; #### remove-traj-f
+;; This removes traj-f's with the given names from a named-traj-f for a given key.
+(defn remove-traj-f
+  "Removes traj-f from the named-traj-f of a workable"
+  [w k names]
+  (let [my-named-traj-f (k (named-traj-f w))]
+    (set-named-traj-f w k (apply dissoc my-named-traj-f names))))
+
+(defn traj-names
+  [w k]
+  (keys (k (named-traj-f w))))
+
 ;; #### named-traj-fn
 ;; This returns a named-traj-fn for a particular key `k`.
 (defn named-traj-fn
