@@ -57,3 +57,12 @@
 (deftest test-traj-names
   (let [new-w1 (workable/remove-traj-f w1 :planned-by-role ["SW"])]
     (is (= ["QA"] (workable/traj-names new-w1 :planned-by-role)))))
+
+
+(deftest test-shift-workable
+  (let [num-days 7
+        orig-dates (workable/get-dates w1 :planned)
+        shifted-proj (workable/shift-workable w1 :planned num-days)
+        new-dates (workable/get-dates shifted-proj :planned)]
+    (is (= (first new-dates) (.plusDays (first orig-dates) num-days)))
+    (is (= (last new-dates) (.plusDays (last orig-dates) num-days)))))

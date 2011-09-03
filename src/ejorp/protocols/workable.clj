@@ -122,3 +122,8 @@
       (traj/make-named-traj-fn named-traj-f)
       null-named-traj-fn)))
 
+(defn shift-workable
+  [w k num-days]
+  (let [new-dates (map #(.plusDays % num-days) (get-dates w k))]
+    (set-dates w k new-dates)))
+
