@@ -1,23 +1,26 @@
 (ns ejorp.protocols.workable
   (:require [ejorp.protocols.traj :as traj]))
 
-;; Workables are things that require effort to be completed. The protocol itself
-;; is based on getting refs to date-maps and named-traj-f's. The named-traj-f's
-;; can be used in the `traj` library.
+;; Workables are things that require effort to be completed. They have dates
+;; associated with them such as a planned start and end.  They also have
+;; trajectories associated with them that indicate things like loading over
+;; time.
 (defprotocol Workable
   (date-map [w])
   (named-traj-f [w]))
 
 ;; #### set-dates
-;; This basically updates the date-map for a workable to have a new set of dates.
-;; Usually, `dates` come in pairs (a start and an end). However, there can be an
-;; arbitrary number of them. We have the following conventions:
+;; This basically updates the date-map for a workable to have a new set of
+;; dates.  Usually, `dates` come in pairs (a start and an end). However, there
+;; can be an arbitrary number of them. We have the following conventions:
 ;;
 ;; * **planned**: These dates are usually the first ones specified for a workable. 
 ;; These dates are the start and end for the entire workable.
-;; * **in-play**: These dates are associated with live data. These are the best guesses given project data.
+;; * **in-play**: These dates are associated with live data. These are the best
+;; guesses given project data.
 ;; * **actual**: These dates are associated with what actually occured.
-;; * **baseline-YYYY-MM-DD**: These are the dates that were `in-play` dates at the time of the baseline.
+;; * **baseline-YYYY-MM-DD**: These are the dates that were `in-play` dates at
+;; the time of the baseline.
 (defn set-dates
   "This sets the dates for a workable for a given key `k`"
   [w k dates]
@@ -32,8 +35,9 @@
   (k (date-map w)))
 
 ;; #### duration
-;; This returns the duration in days of a workable. The key `k` is associated with the `date-map` keys.
-;; If the key is not present, we default to `:planned` dates.
+;; This returns the duration in days of a workable. The key `k` is associated
+;; with the `date-map` keys.  If the key is not present, we default to
+;; `:planned` dates.
 (defn duration
   "Computes the duration of a w"
   [w & k]
@@ -52,7 +56,8 @@
 ;; #### fraction-of
 ;; This computes the fraction from start to end of a workable.
 ; TODO: We should be able to specify a date-map-ref key
-; TODO: When we add shelving/interrupting of workables, this needs to be smart enough to take that into account
+; TODO: When we add shelving/interrupting of workables, this needs to be smart
+; enough to take that into account
 (defn fraction-of
   "Returns the fraction that a date is in a workable"
   [workable date]
@@ -92,6 +97,29 @@
   (let [new-traj-map (assoc (named-traj-f w) k f)]
     (assoc w :named-traj-f new-traj-map)))
 
+;; #### add-traj-f
+;; This allows us to add a traj-f to a named-traj-f for a given key.
+(defn add-traj-f
+  "Adds a traj-f to a named-traj-f for a workable"
+  [w k f]
+  (let [my-named-traj-f (k (named-traj-f w))]
+    (set-named-traj-f w k (merge my-named-traj-f f))))
+
+;; #### remove-traj-f
+;; This removes traj-f's with the given names from a named-traj-f for a given key.
+(defn remove-traj-f
+  "Removes traj-f from the named-traj-f of a workable"
+  [w k names]
+  (let [my-named-traj-f (k (named-traj-f w))]
+    (set-named-traj-f w k (apply dissoc my-named-traj-f names))))
+
+;; #### traj-names
+;; Gets the names of the named-traj-f with key `k` for a workable.
+(defn traj-names
+  "Returns the names of a named-traj-f of a workable."
+  [w k]
+  (keys (k (named-traj-f w))))
+
 ;; #### named-traj-fn
 ;; This returns a named-traj-fn for a particular key `k`.
 (defn named-traj-fn
@@ -101,4 +129,13 @@
     (if named-traj-fn 
       (traj/make-named-traj-fn named-traj-f)
       null-named-traj-fn)))
+
+;; #### shift-workable
+;; Shifts the dates with key `k` in a workable by some number of days.  This
+;; returns the new workable.
+(defn shift-workable
+  "Shifts the dates of a workable by some number of days"
+  [w k num-days]
+  (let [new-dates (map #(.plusDays % num-days) (get-dates w k))]
+    (set-dates w k new-dates)))
 
