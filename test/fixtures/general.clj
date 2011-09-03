@@ -12,7 +12,10 @@
 (def james (Person. 102 "James Simonsen"))
 
 (def empty-sw-team (Team. 10 "SW Team"))
-(def sw-team (add-members empty-sw-team [rino "Node Engineer"] [roland "Warblade Knight"] [james "Node Engineer"]))
+(def sw-team (add-members empty-sw-team 
+                          [rino "Node Engineer"] 
+                          [roland "Warblade Knight"] 
+                          [james "Node Engineer"]))
 
 (def jul15 (str-to-date "2011-07-15"))
 (def jul31 (str-to-date "2011-07-31"))
