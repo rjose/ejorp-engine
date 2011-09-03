@@ -2,11 +2,11 @@
   (:require [ejorp.protocols.traj :as traj]))
 
 ;; Workables are things that require effort to be completed. The protocol itself
-;; is based on getting refs to date-maps and named-traj-maps. The named-traj-maps
+;; is based on getting refs to date-maps and named-traj-f's. The named-traj-f's
 ;; can be used in the `traj` library.
 (defprotocol Workable
   (date-map [w])
-  (named-traj-map [w]))
+  (named-traj-f [w]))
 
 ;; #### set-dates
 ;; This basically updates the date-map for a workable to have a new set of dates.
@@ -77,7 +77,7 @@
   [date-ranges]
   {})
 
-;; #### set-named-traj-fn
+;; #### set-named-traj-f
 ;; This enables us to manage trajectory functions. We use the following naming conventions:
 ;;
 ;; * **planned-by-role**: This constructs traj's for loading requirements by role.
@@ -86,19 +86,19 @@
 ;; * **baseline-YYYY-MM-DD-by-role**: This constructs traj's for a given baseline
 ;;
 ;; In addition to these, we'll have `by-team`, `by-assignee` variants.
-(defn set-named-traj-fn
+(defn set-named-traj-f
   "Sets one of the named-traj-fn's for a w"
   [w k f]
-  (let [new-traj-map (assoc (named-traj-map w) k f)]
-    (assoc w :named-traj-map new-traj-map)))
+  (let [new-traj-map (assoc (named-traj-f w) k f)]
+    (assoc w :named-traj-f new-traj-map)))
 
 ;; #### named-traj-fn
 ;; This returns a named-traj-fn for a particular key `k`.
 (defn named-traj-fn
   "Returns the named-traj-fn associated with a particular key `k` for a workable"
   [workable k]
-  (let [named-traj-fn (k (named-traj-map workable))]
+  (let [named-traj-f (k (named-traj-f workable))]
     (if named-traj-fn 
-      named-traj-fn
+      (traj/make-named-traj-fn named-traj-f)
       null-named-traj-fn)))
 
