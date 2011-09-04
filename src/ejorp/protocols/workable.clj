@@ -75,9 +75,9 @@
         [start-date end-date] (:planned date-map)]
     (traj/clamp-date [start-date end-date] date)))
 
-;; #### null-named-traj-fn
+;; #### null-traj-fn
 ;; This just returns an empty map.
-(defn null-named-traj-fn
+(defn null-traj-fn
   "Takes a seq of date ranges and returns {}"
   [date-ranges]
   {})
@@ -92,7 +92,7 @@
 ;;
 ;; In addition to these, we'll have `by-team`, `by-assignee` variants.
 (defn set-named-traj-f
-  "Sets one of the named-traj-fn's for a w"
+  "Sets one of the traj-fn's for a w"
   [w k f]
   (let [new-traj-map (assoc (named-traj-f w) k f)]
     (assoc w :named-traj-f new-traj-map)))
@@ -120,15 +120,15 @@
   [w k]
   (keys (k (named-traj-f w))))
 
-;; #### named-traj-fn
-;; This returns a named-traj-fn for a particular key `k`.
-(defn named-traj-fn
-  "Returns the named-traj-fn associated with a particular key `k` for a workable"
+;; #### traj-fn
+;; This returns a traj-fn for a particular key `k`.
+(defn traj-fn
+  "Returns the traj-fn associated with a particular key `k` for a workable"
   [workable k]
   (let [named-traj-f (k (named-traj-f workable))]
-    (if named-traj-fn 
-      (traj/make-named-traj-fn named-traj-f)
-      null-named-traj-fn)))
+    (if traj-fn 
+      (traj/make-traj-fn named-traj-f)
+      null-traj-fn)))
 
 ;; #### shift-workable
 ;; Shifts the dates with key `k` in a workable by some number of days.  This

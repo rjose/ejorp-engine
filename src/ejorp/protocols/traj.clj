@@ -7,10 +7,10 @@
 ;; * **date-range**: an interval defined by a start-date and an end-date
 ;; * **date-ranges**: a seq of date-range
 ;; * **traj**: a sequence of numbers each associated with a date range
-;; * **traj-f**: a function that returns a traj for a seq of date-ranges
 ;; * **named-traj**: A map of name => traj
+;; * **traj-f**: a function that returns a traj for a seq of date-ranges
 ;; * **named-traj-f**: A map of name => traj-f
-;; * **named-traj-fn**: A function that returns a named-traj for a seq of date ranges
+;; * **traj-fn**: A function that returns a named-traj for a seq of date ranges
 (ns ejorp.protocols.traj
   (:use ejorp.util.density-integrals)
   (:use ejorp.util.date))
@@ -79,10 +79,10 @@
   (into {} (map (fn [[role scale]] [role (make-uniform-traj-f scale date-range)]) scale-map)))
 
 
-;; #### make-named-traj-fn
+;; #### make-traj-fn
 ;; This creates a function that can be applied to a seq of date ranges to
 ;; return the associated a named-traj.
-(defn make-named-traj-fn
+(defn make-traj-fn
   "Builds a function that returns the loading trajectory for all roles"
   [named-traj-f]
   (fn [date-ranges]
@@ -139,8 +139,8 @@
   [& named-trajs]
   (if (pos? (count named-trajs)) (apply merge-with sum-traj named-trajs) {}))
 
-;; #### make-traj-fn
-;; This is used to construct a function that can be used to generate traj's
+;; #### make-traj-f-element
+;; This is used to construct a function that can be used to generate a traj-f
 ;; from effort data. The `start-bound-date` is the reference date for this
 ;; function and is associated with the first value in `values`. The `values`
 ;; vec contains effort info for each consecutive day after `start-bound-date`
@@ -148,7 +148,7 @@
 ;; This returns a function that takes a date range and returns the sum of the
 ;; efforts within that range. The range includes the start but not the end,
 ;; i.e., it looks like this: [s-date, e-date).
-(defn make-traj-fn
+(defn make-traj-f-element
   "Returns a traj-fn that can be applied to a seq of date-ranges to product a traj"
   [start-bound-date values]
   (let [end-bound-rel (count values)]
@@ -167,13 +167,13 @@
 (defn effort-data-to-traj-f
   "Retrns a traj-f based on some data"
   [{:keys [start-date values]}]
-  (let [traj-fn (make-traj-fn start-date values)]
+  (let [traj-fn (make-traj-f-element start-date values)]
     (fn [date-ranges] 
       (map traj-fn date-ranges)))) 
 
 ;; #### effort-data-to-named-traj-f
 ;; This takes effort data in the form of a `named-effort-map` and returns a a
-;; named-traj-fn based on it. The effort map looks like this:
+;; traj-fn based on it. The effort map looks like this:
 ;;
 ;;   `{"SW" {:start-date (str-to-date "2011-08-22"), :values [1 2 3 4 5 5 4 3 2 1 ]}}`
 (defn effort-data-to-named-traj-f
@@ -181,4 +181,4 @@
   [named-effort-map]
   (let [named-traj-f (into {} (map (fn [[role effort-data]] 
                                      [role (effort-data-to-traj-f effort-data)]) named-effort-map))]
-    (make-named-traj-fn named-traj-f)))
+    (make-traj-fn named-traj-f)))

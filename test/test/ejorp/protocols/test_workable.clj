@@ -43,23 +43,23 @@
 (deftest test-duration
   (is (= 31 (workable/duration w1))))
 
-;; This tests that we can get a named-traj-fn for a given key. This is an
-;; interesting function because it's creating the named-traj-fn lazily based on
+;; This tests that we can get a traj-fn for a given key. This is an
+;; interesting function because it's creating the traj-fn lazily based on
 ;; the named-traj-f for a workable.
 (deftest test-get-planned-trajectory
-  (let [role-traj-fn (workable/named-traj-fn w1 :planned-by-role)]
+  (let [role-traj-fn (workable/traj-fn w1 :planned-by-role)]
     (is (= {"SW" [2], "QA" [1]} (role-traj-fn [[jul30 aug30]])))))
 
 ;; This tests that we can add a traj-f to an existing named-traj-f
 (deftest test-add-traj-f
   (let [new-w1 (workable/add-traj-f w1 :planned-by-role named-traj-f2)
-        new-traj-fn (workable/named-traj-fn new-w1 :planned-by-role)]
+        new-traj-fn (workable/traj-fn new-w1 :planned-by-role)]
     (is (= {"SW" [2], "QA" [1], "PM" [2]} (new-traj-fn [[jul30 aug30]])))))
 
 ;; This tests that we can remove a traj-f from a named-traj-f
 (deftest test-remove-traj-f
   (let [new-w1 (workable/remove-traj-f w1 :planned-by-role ["SW"])
-        new-traj-fn (workable/named-traj-fn new-w1 :planned-by-role)]
+        new-traj-fn (workable/traj-fn new-w1 :planned-by-role)]
     (is (= {"QA" [1]} (new-traj-fn [[jul30 aug30]])))))
 
 ;; This tests that we can get the names of a named-traj-f for a workable.

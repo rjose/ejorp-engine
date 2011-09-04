@@ -27,7 +27,7 @@
 ;; These are named trajectory functions that can be used to generate named-traj
 ;; sequences.
 (def named-traj-f {"SW" uniform-traj-3, "QA" uniform-traj-1})
-(def named-traj-fn (make-named-traj-fn named-traj-f))
+(def traj-fn (make-traj-fn named-traj-f))
 (def named-traj1 {"SW" [1.0 2.0 3.0 1.0], "QA" [0.0 0.0 0.5 0.5]})
 (def named-traj2 {"SW" [1.0 1.0 1.0 1.0], "QA" [0.5 0.5 0.5 0.5]})
 
@@ -67,9 +67,9 @@
 ;  (is (= 0 (first (uniform-traj-3 [[aug-10 aug-11]]))))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-16 aug-25]])) 0.1)))
   
-;; The `named-traj-fn` will be the workhouse of any project loading computations.
-(deftest test-make-named-traj-fn
-  (let [results (named-traj-fn [[aug-10 aug-13]])]
+;; The `traj-fn` will be the workhouse of any project loading computations.
+(deftest test-make-traj-fn
+  (let [results (traj-fn [[aug-10 aug-13]])]
     (is (approx= 1.5 (first (results "SW")) 0.1))
     (is (approx= 0.5 (first (results "QA")) 0.1))))
 
@@ -84,12 +84,12 @@
 ;; This tests the shifting of a traj-f in time. Note that while the original intent
 ;; of shift-traj-f was to literally shift traj-f functions in time, it can
 ;; correctly shift any function of date-ranges in time. In this case, we're shifting
-;; a named-traj-fn in time.
+;; a traj-fn in time.
 (deftest test-shift-traj-f
   (let [ranges1 [[aug-10 aug-16]]
-        named-traj-shifted-0 ((shift-traj-f named-traj-fn 0) ranges1)
-        named-traj-shifted-3 ((shift-traj-f named-traj-fn 3) ranges1)
-        named-traj-shifted-6 ((shift-traj-f named-traj-fn 6) ranges1)]
+        named-traj-shifted-0 ((shift-traj-f traj-fn 0) ranges1)
+        named-traj-shifted-3 ((shift-traj-f traj-fn 3) ranges1)
+        named-traj-shifted-6 ((shift-traj-f traj-fn 6) ranges1)]
     (is (= {"SW" [3.0], "QA" [1.0]} named-traj-shifted-0))
     (is (= {"SW" [1.5], "QA" [0.5]} named-traj-shifted-3))
     (is (= {"SW" [0.0], "QA" [0.0]} named-traj-shifted-6))))
@@ -115,8 +115,8 @@
 
 ;; This tests that we can make a traj-fn. This is a component used in the
 ;; `effort-data-to-traj-f` function.
-(deftest test-make-traj-fn
-  (let [traj-fn (make-traj-fn aug-8 [1 2 3 4 5 5 4 3 2 1 ])]
+(deftest test-make-traj-f-element
+  (let [traj-fn (make-traj-f-element aug-8 [1 2 3 4 5 5 4 3 2 1 ])]
     (is (= 0 (traj-fn [aug-5 aug-8])))
     (is (= 3 (traj-fn [aug-8 aug-10])))
     (is (= 24 (traj-fn [aug-10 aug-16]))) 
