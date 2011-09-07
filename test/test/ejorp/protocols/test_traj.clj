@@ -14,7 +14,9 @@
 (def aug-8 (str-to-date "2011-08-08"))
 (def aug-10 (str-to-date "2011-08-10"))
 (def aug-11 (str-to-date "2011-08-11"))
+(def aug-12 (str-to-date "2011-08-12"))
 (def aug-13 (str-to-date "2011-08-13"))
+(def aug-14 (str-to-date "2011-08-14"))
 (def aug-15 (str-to-date "2011-08-15"))
 (def aug-16 (str-to-date "2011-08-16"))
 (def aug-25 (str-to-date "2011-08-25"))
@@ -57,6 +59,17 @@
         load-traj-f (density-integral-to-traj-f [aug-10 aug-16] density-f)]
     (is (approx= 1.25 (first (load-traj-f [[aug-10 aug-13]])) 0.1))))
 
+(deftest test-make-uniform-traj-f
+  (let [uniform-traj-f1 (make-uniform-traj-f 6 [aug-10 aug-16])]
+    (is (= [0] (uniform-traj-f1 [[aug-10 aug-10]])))
+    (is (= [1] (uniform-traj-f1 [[aug-10 aug-11]])))
+    (is (= [2] (uniform-traj-f1 [[aug-10 aug-12]])))
+    (is (= [1] (uniform-traj-f1 [[aug-12 aug-13]])))
+    (is (= [3] (uniform-traj-f1 [[aug-10 aug-13]])))
+    (is (= [6] (uniform-traj-f1 [[aug-10 aug-16]])))
+    (is (= [6] (uniform-traj-f1 [[aug-5 aug-25]])))
+    ))
+
 ;; Building uniform-named-traj-f is the starting point for doing any
 ;; first cut at modeling project resource planning.
 (deftest test-make-uniform-named-traj-f
@@ -64,7 +77,6 @@
   (is (approx= 1.5 (first (uniform-traj-3 [[aug-10 aug-13]])) 0.1))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-5 aug-10]])) 0.1))
   (is (= 0 (first (uniform-traj-3 [[aug-10 aug-10]]))))
-;  (is (= 0 (first (uniform-traj-3 [[aug-10 aug-11]]))))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-16 aug-25]])) 0.1)))
   
 ;; The `traj-fn` will be the workhouse of any project loading computations.
