@@ -14,7 +14,7 @@ def green(text); colorize(text, "\e[0;32m"); end
 def match_testing(output)
   for line in output.split("\n")
     line += "\n"
-    if line.match(/Testing.*|0 failures.*|Ran \d+ tests containing \d+ assertions.*/)
+    if line.match(/cake test|----|Finished|Testing.*|0 failures.*|Ran \d+ tests containing \d+ assertions.*/)
       print green(line)
     else
       print red(line)
@@ -23,6 +23,6 @@ def match_testing(output)
 end
 
 def test_stuff
-  match_testing(`lein test`)
+  match_testing(`cake test`)
   puts "#{Time.now.strftime("%I:%M %p")} ======================="
 end
