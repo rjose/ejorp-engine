@@ -28,10 +28,13 @@
 
 ;; These are named trajectory functions that can be used to generate named-traj
 ;; sequences.
-(def named-traj-f {"SW" uniform-traj-3, "QA" uniform-traj-1})
-(def traj-fn (make-traj-fn named-traj-f))
+(def named-traj-f1 {"SW" uniform-traj-3, "QA" uniform-traj-1})
+(def named-traj-f2 {"SW" uniform-traj-1, "QA" uniform-traj-1})
+(def traj-fn1 (make-traj-fn named-traj-f1))
+(def traj-fn2 (make-traj-fn named-traj-f2))
 (def named-traj1 {"SW" [1.0 2.0 3.0 1.0], "QA" [0.0 0.0 0.5 0.5]})
 (def named-traj2 {"SW" [1.0 1.0 1.0 1.0], "QA" [0.5 0.5 0.5 0.5]})
+
 
 ;; This is effort data that can be used for constructing a traj-f
 (def effort-data1 {:start-date aug-8, :values [1 2 3 4 5 5 4 3 2 1]})
@@ -81,7 +84,7 @@
   
 ;; The `traj-fn` will be the workhouse of any project loading computations.
 (deftest test-make-traj-fn
-  (let [results (traj-fn [[aug-10 aug-13]])]
+  (let [results (traj-fn1 [[aug-10 aug-13]])]
     (is (approx= 1.5 (first (results "SW")) 0.1))
     (is (approx= 0.5 (first (results "QA")) 0.1))))
 
@@ -99,9 +102,9 @@
 ;; a traj-fn in time.
 (deftest test-shift-traj-f
   (let [ranges1 [[aug-10 aug-16]]
-        named-traj-shifted-0 ((shift-traj-f traj-fn 0) ranges1)
-        named-traj-shifted-3 ((shift-traj-f traj-fn 3) ranges1)
-        named-traj-shifted-6 ((shift-traj-f traj-fn 6) ranges1)]
+        named-traj-shifted-0 ((shift-traj-f traj-fn1 0) ranges1)
+        named-traj-shifted-3 ((shift-traj-f traj-fn1 3) ranges1)
+        named-traj-shifted-6 ((shift-traj-f traj-fn1 6) ranges1)]
     (is (= {"SW" [3.0], "QA" [1.0]} named-traj-shifted-0))
     (is (= {"SW" [1.5], "QA" [0.5]} named-traj-shifted-3))
     (is (= {"SW" [0.0], "QA" [0.0]} named-traj-shifted-6))))
@@ -128,12 +131,11 @@
 ;; This tests that we can make a traj-fn. This is a component used in the
 ;; `effort-data-to-traj-f` function.
 (deftest test-make-traj-f-element
-  (let [traj-fn (make-traj-f-element aug-8 [1 2 3 4 5 5 4 3 2 1 ])]
-    (is (= 0 (traj-fn [aug-5 aug-8])))
-    (is (= 3 (traj-fn [aug-8 aug-10])))
-    (is (= 24 (traj-fn [aug-10 aug-16]))) 
-    (is (= 0 (traj-fn [aug-10 aug-10])))
-    ))
+  (let [traj-f-element (make-traj-f-element aug-8 [1 2 3 4 5 5 4 3 2 1 ])]
+    (is (= 0 (traj-f-element [aug-5 aug-8])))
+    (is (= 3 (traj-f-element [aug-8 aug-10])))
+    (is (= 24 (traj-f-element [aug-10 aug-16]))) 
+    (is (= 0 (traj-f-element [aug-10 aug-10])))))
 
 ;; This demonstrates how to create a traj-f from data.
 (deftest test-effort-data-to-traj-f
@@ -144,3 +146,13 @@
 (deftest test-effort-data-to-named-traj-f
   (let [my-named-traj-f (effort-data-to-named-traj-f {"SW" effort-data1, "QA" effort-data2})]
     (is (= {"SW" [24], "QA" [0]} (my-named-traj-f [[aug-10 aug-16]])))))
+
+;; This tests that we can sum two traj-fn's together.
+(deftest test-sum-traj-fn
+  (let [sum-fn (sum-traj-fn [traj-fn1 traj-fn2])]
+    (is (= {"SW" [4], "QA" [2]} (sum-fn [[aug-10 aug-16]])))))
+
+;; This tests that we can squash a traj-fn.
+(deftest test-squash-traj-fn
+  (let [squashed-fn (squash-traj-fn traj-fn1)]
+    (is (= [4] (squashed-fn [[aug-10 aug-16]])))))

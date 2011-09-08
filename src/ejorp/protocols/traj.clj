@@ -182,3 +182,28 @@
   (let [named-traj-f (into {} (map (fn [[role effort-data]] 
                                      [role (effort-data-to-traj-f effort-data)]) named-effort-map))]
     (make-traj-fn named-traj-f)))
+
+;; #### sum-traj-fn
+;; This function is used to sum multiple traj-fns together. The result is the
+;; sum by whatever names in each traj-fn. This will be useful in computing
+;; total loading by role for a set of projects (or other workables). 
+;;
+;; This will also be used to sum projects in play together and then to overlay
+;; a set of planned projects on top to see where the staff shortfalls are.
+(defn sum-traj-fn
+  "Returns a function that returns the sum of a seq of traj-fns over a seq of date ranges"
+  [traj-fns]
+  (fn [date-ranges] 
+    (let [named-traj-fs (map (fn [traj-fn] (traj-fn date-ranges)) traj-fns)]
+      (apply sum-named-traj named-traj-fs))))
+
+;; #### squash-traj-fn
+;; This function is used to create a function that squashes (i.e. sums) all
+;; values in each date range.  This is useful in looking at an aggregate
+;; loading chart by project/workable.
+(defn squash-traj-fn
+  "Returns a function that sums the values across all names for a traj-fn"
+  [traj-fn]
+  (fn [date-ranges]
+    (let [named-traj-f (traj-fn date-ranges)]
+      (apply map + (vals named-traj-f)))))
