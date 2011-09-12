@@ -42,7 +42,7 @@
 
 ;; * Views required effort by staff or by project
 (def ranges-1 [[jul15 jul31] [oct30 nov30]])
-((workable/total-loading-by-role :planned-by-role [jupiter neptune saturn]) ranges-1)
+((workable/total-loading-by-role [jupiter neptune saturn] :planned-by-role) ranges-1)
 ((workable/loading-by-workable {"Jupiter" jupiter, "Neptune" neptune, "Saturn" saturn} :planned-by-role) ranges-1)
 
 ;; ## Scenario: Existing user, invites team member

@@ -148,8 +148,8 @@
     (is (= {"SW" [24], "QA" [0]} (my-named-traj-f [[aug-10 aug-16]])))))
 
 ;; This tests that we can sum two traj-fn's together.
-(deftest test-sum-traj-fn
-  (let [sum-fn (sum-traj-fn [traj-fn1 traj-fn2])]
+(deftest test-sum-traj-fns
+  (let [sum-fn (sum-traj-fns [traj-fn1 traj-fn2])]
     (is (= {"SW" [4], "QA" [2]} (sum-fn [[aug-10 aug-16]])))))
 
 ;; This tests that we can squash a traj-fn.
