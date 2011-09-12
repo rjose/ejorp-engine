@@ -1,6 +1,8 @@
 (ns test.ejorp.protocols.test-workable
   (:use clojure.test)
   (:use clojure.contrib.generic.math-functions)
+  (:use [ejorp.nouns.project :as project])
+  (:import ejorp.nouns.project.Project)
   (:use [ejorp.protocols.workable :as workable])  
   (:use ejorp.util.date)
   (:require [ejorp.protocols.traj :as traj])
@@ -16,12 +18,16 @@
   (named-traj-f [w] (:named-traj-f w)))
 
 ;; These are some common dates we use throughout
+(def jul15 (str-to-date "2011-07-15"))
 (def jul30 (str-to-date "2011-07-30"))
+(def jul31 (str-to-date "2011-07-31"))
 (def aug1 (str-to-date "2011-08-01"))
 (def aug5 (str-to-date "2011-08-05"))
 (def aug10 (str-to-date "2011-08-10"))
 (def aug12 (str-to-date "2011-08-12"))
 (def aug30 (str-to-date "2011-08-30"))
+(def oct30 (str-to-date "2011-10-30"))
+(def nov30 (str-to-date "2011-11-30"))
 
 (def date-ranges1 (partition 2 1 (map str-to-date [jul30 aug5 aug10 aug12])))
 
@@ -75,3 +81,31 @@
         new-dates (workable/get-dates shifted-proj :planned)]
     (is (= (first new-dates) (.plusDays (first orig-dates) num-days)))
     (is (= (last new-dates) (.plusDays (last orig-dates) num-days)))))
+
+;; Merge with data above
+(def jupiter (Project. 1001 "Jupiter" {} {}))
+(def jupiter (workable/set-dates jupiter :planned [jul31 oct30]))
+
+(def neptune (Project. 1002 "Neptune" {} {}))
+(def neptune (workable/set-dates neptune :planned [jul15 oct30]))
+
+(def saturn (Project. 1003 "Saturn" {} {}))
+(def saturn (workable/set-dates saturn :planned [oct30 nov30]))
+
+(def named-traj-f3 (traj/make-uniform-named-traj-f {"SW" 2, "QA" 1} [jul31 oct30]))
+(def jupiter (workable/add-traj-f jupiter :planned-by-role named-traj-f3))
+
+(def named-traj-f4 (traj/make-uniform-named-traj-f {"SW" 4, "QA" 1} [jul15 oct30]))
+(def neptune (workable/add-traj-f neptune :planned-by-role named-traj-f4))
+
+(def named-traj-f5 (traj/make-uniform-named-traj-f {"SW" 3, "QA" 2} [oct30 nov30]))
+(def saturn (workable/add-traj-f saturn :planned-by-role named-traj-f5))
+
+(deftest test-total-loading-by-role
+  (let [loading-fn (workable/total-loading-by-role [jupiter neptune saturn] :planned-by-role)]
+    (is (= {"SW" [9], "QA" [4]} (loading-fn [[jul15 nov30]])))))
+
+(deftest test-loading-by-workable
+  (let [workable-map {"Jupiter" jupiter, "Neptune" neptune, "Saturn" saturn}
+        loading-fn (workable/loading-by-workable workable-map :planned-by-role)]
+    (is (= {"Jupiter" [3], "Neptune" [5], "Saturn" [5]} (loading-fn [[jul15 nov30]])))))

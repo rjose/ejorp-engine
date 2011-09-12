@@ -86,7 +86,7 @@
   "Builds a function that returns the loading trajectory for all roles"
   [named-traj-f]
   (fn [date-ranges]
-    (into {} (map (fn [[role traj-f]] [role (traj-f date-ranges)]) named-traj-f))))
+    (into {} (map (fn [[name traj-f]] [name (traj-f date-ranges)]) named-traj-f))))
 
 ;; ##Date shift functions
 
@@ -183,14 +183,14 @@
                                      [role (effort-data-to-traj-f effort-data)]) named-effort-map))]
     (make-traj-fn named-traj-f)))
 
-;; #### sum-traj-fn
+;; #### sum-traj-fns
 ;; This function is used to sum multiple traj-fns together. The result is the
 ;; sum by whatever names in each traj-fn. This will be useful in computing
 ;; total loading by role for a set of projects (or other workables). 
 ;;
 ;; This will also be used to sum projects in play together and then to overlay
 ;; a set of planned projects on top to see where the staff shortfalls are.
-(defn sum-traj-fn
+(defn sum-traj-fns
   "Returns a function that returns the sum of a seq of traj-fns over a seq of date ranges"
   [traj-fns]
   (fn [date-ranges] 

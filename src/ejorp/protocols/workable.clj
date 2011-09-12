@@ -139,3 +139,24 @@
   (let [new-dates (map #(.plusDays % num-days) (get-dates w k))]
     (set-dates w k new-dates)))
 
+;; #### total-loading-by-role
+;; This function gives us a way to view the aggregate loading by role across a
+;; number of workables. Technically, it can sum across any named-traj for a set
+;; of workables, but the normal case is to sum by role.
+(defn total-loading-by-role
+  "This returns a traj-fn that computes the total loading across a set of
+  workables by some key."
+  [workables k]
+  (let [traj-fns (map #(traj-fn % k) workables)]
+    (traj/sum-traj-fns traj-fns)))
+
+;; #### loading-by-workable
+;; This function gives us a way to sum across the efforts of workables and
+;; slice the result by workable.  We do this by squashing each of the workable
+;; traj-fns and then creating a new traj-fn based on the workable name.
+(defn loading-by-workable
+  "This returns a traj-fn for computing the total loading by workable"
+  [workable-map k]
+  (let [squash-workable (fn [[name w]] [name (traj/squash-traj-fn (traj-fn w k))]) 
+        squashed-named-traj-f (into {} (map squash-workable workable-map))]
+    (traj/make-traj-fn squashed-named-traj-f)))
