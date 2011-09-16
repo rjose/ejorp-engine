@@ -4,8 +4,7 @@
   (:use [ejorp.nouns.project :as project])
   (:import ejorp.nouns.project.Project)
   (:use ejorp.util.date)
-  (:require [ejorp.protocols.traj :as traj])
-)
+  (:require [ejorp.protocols.traj :as traj]))
 
 (def jul15 (str-to-date "2011-07-15"))
 (def jul31 (str-to-date "2011-07-31"))
@@ -20,14 +19,14 @@
 (def current-user {:id 100, :name "Rino Jose", :pictureUrl "http://somepic.png"})
 
 ;; * Creates a project by specifying a name and planned start/end dates
-(def jupiter (Project. 1001 "Jupiter" {} {}))
+(def jupiter (Project. 1001 "Jupiter" {} {} {}))
 (def jupiter (workable/set-dates jupiter :planned [jul31 oct30]))
 
 ;; * Creates two more projects like this
-(def neptune (Project. 1002 "Neptune" {} {}))
+(def neptune (Project. 1002 "Neptune" {} {} {}))
 (def neptune (workable/set-dates neptune :planned [jul15 oct30]))
 
-(def saturn (Project. 1002 "Saturn" {} {}))
+(def saturn (Project. 1002 "Saturn" {} {} {}))
 (def saturn (workable/set-dates saturn :planned [oct30 nov30]))
 
 ;; * Updates project by specifying required staff
