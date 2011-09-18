@@ -5,3 +5,7 @@ docs/uberdoc.html
 *.class
 *.jar
 *.swp
+.cake*
+.DS_Store
+lib/deps.clj
+pom.xml

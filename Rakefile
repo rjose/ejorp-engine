@@ -1,6 +1,6 @@
 desc "Generate documentation files"
 task :doc do
-  sh "java -jar ~/jars/marginalia.jar src/ejorp/ test/"
+  sh "cake marg"
 end
 
 desc "Runs tests"

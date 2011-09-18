@@ -27,12 +27,12 @@
                                                 "Warblade Knight" 1.0} [jul15 nov30]))
 
 ;; TODO: We may need to rewrite these in the face of the new workable changes
-(def jupiter (-> (Project. 1000 "Jupiter" {} {})
+(def jupiter (-> (Project. 1000 "Jupiter" {} {} {})
                (workable/set-named-traj-f :planned-by-role traj-map1)
                (workable/set-dates :planned [jul31 oct30])))
 
 
-(def neptune (-> (Project. 1001 "Neptune" {} {})
+(def neptune (-> (Project. 1001 "Neptune" {} {} {})
                (workable/set-named-traj-f :planned-by-role traj-map2)
                (workable/set-dates :planned [jul15 nov30])))
 

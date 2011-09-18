@@ -83,13 +83,13 @@
     (is (= (last new-dates) (.plusDays (last orig-dates) num-days)))))
 
 ;; Merge with data above
-(def jupiter (Project. 1001 "Jupiter" {} {}))
+(def jupiter (Project. 1001 "Jupiter" {} {} {}))
 (def jupiter (workable/set-dates jupiter :planned [jul31 oct30]))
 
-(def neptune (Project. 1002 "Neptune" {} {}))
+(def neptune (Project. 1002 "Neptune" {} {} {}))
 (def neptune (workable/set-dates neptune :planned [jul15 oct30]))
 
-(def saturn (Project. 1003 "Saturn" {} {}))
+(def saturn (Project. 1003 "Saturn" {} {} {}))
 (def saturn (workable/set-dates saturn :planned [oct30 nov30]))
 
 (def named-traj-f3 (traj/make-uniform-named-traj-f {"SW" 2, "QA" 1} [jul31 oct30]))
