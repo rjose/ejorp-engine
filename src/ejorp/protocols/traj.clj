@@ -18,6 +18,7 @@
 ;; ## Utility functions
 ;; These are various utility functions that apply to traj functions.  We may
 ;; move them to a more general place if other modules need them as well.
+
 (defn- clamp 
   "Clamps a value to be within the given range"
   [x min max] 
@@ -43,60 +44,50 @@
 
 ;; ## Trajectory Functions
 
-;; #### density-integral-to-traj-f
-;; This constructs a traj-f from a density integral.  The `start-date` and
-;; `end-date` define the total range of this function.
 (defn density-integral-to-traj-f
-  "Constructs a traj-f from a density integral."
+  "Constructs a traj-f from a density integral. The `start-date` and `end-date`
+  define the total range of this function."
   [[start-date end-date] density-integral]
   (fn [date-ranges]
     (let [frac (partial fraction-of [start-date end-date])
           frac-ranges (map (fn [d-range] (map frac d-range)) date-ranges)]
       (map density-integral frac-ranges))))
 
-;; #### make-uniform-traj-f
-;; This is a convenience function that constructs a traj-f based on a uniform
-;; density integral over a given period of time. The `scale` argument scales
-;; the integral. For instance 
-;; 
-;; `(make-uniform-traj-f 3 [start-date end-date])`
-;; 
-;; will return a load-traj function whose total integrated value would be 3.
 (defn make-uniform-traj-f
-  "Constructs a load-traj function with uniform density over a time period"
+  "Constructs a load-traj function with uniform density over a time period. The
+  `scale` argument scales the integral. For instance:
+
+    (make-uniform-traj-f 3 [start-date end-date])
+
+  will return a load-traj function whose total integrated value would be 3."
   [scale [start-date end-date]]
   (let [density-f (scale-density-integral scale uniform-density-integral)]
     (density-integral-to-traj-f [start-date end-date] density-f)))
 
 
-;; #### make-uniform-named-traj-f
-;; This is a convenience function that takes a `scale-map` like
-;; `{"SW" 2.0, "QA" 0.5}` and a date-range and returns a map of 
-;; names to uniform-traj-f.
 (defn make-uniform-named-traj-f
-  "Constructs a named-traj map with uniform functions."
+  "Constructs a named-traj map with uniform traj-f's from a 'scale-map' of the form:
+  
+    {'SW' 2.0, 'QA' 0.5} "
   [scale-map date-range]
   (into {} (map (fn [[role scale]] [role (make-uniform-traj-f scale date-range)]) scale-map)))
 
 
-;; #### make-traj-fn
-;; This creates a function that can be applied to a seq of date ranges to
-;; return the associated a named-traj.
 (defn make-traj-fn
-  "Builds a function that returns the loading trajectory for all roles"
+  "This creates a function that can be applied to a seq of date ranges to
+  return the associated a named-traj."
   [named-traj-f]
   (fn [date-ranges]
     (into {} (map (fn [[name traj-f]] [name (traj-f date-ranges)]) named-traj-f))))
 
+
 ;; ##Date shift functions
 
-;; #### shift-date-range
-;; This shifts a date range by some number of days. We shift the date range
-;; into the past because the common use case is to shift trajectories
-;; "forward".  Shifting trajectories forward moves dates backward relative to
-;; the original traj-f functions.
 (defn shift-date-range
-  "Shifts a date-range into the past"
+  "Shifts a date-range into the past.  We shift the date range into the past
+  because the common use case is to shift trajectories 'forward'.  Shifting
+  trajectories forward moves dates backward relative to the original traj-f
+  functions."
   [date-range num-days]
   (map #(.minusDays % num-days) date-range))
 
@@ -106,50 +97,72 @@
   (map #(shift-date-range % num-days) date-ranges))
 
 
-;; #### shift-date-ranges-f
-;; This function is useful for composing with existing functions that take
-;; date-ranges since it allows us to effectively shift these functions in time.
 (defn shift-date-ranges-f
-  "Creates a function that shifts date ranges by num-days"
+  "Creates a function that shifts date ranges by num-days. This function is
+  useful for composing with existing functions that take date-ranges since it
+  allows us to effectively shift these functions in time."
   [num-days]
   (fn [date-ranges] (shift-date-ranges date-ranges num-days)))
 
-;; #### shift-traj-f
-;; This shifts a traj-f function forward in time by num-days.  The intent is to
-;; do things like move a project back and forth by some number of days without
-;; having to recompute the traj-f function.
 (defn shift-traj-f
-  "Returns a new traj-f shifted in time by num-days"
+  "Returns a new traj-f shifted in time by num-days.  The intent is to do
+  things like move a project back and forth by some number of days without
+  having to recompute the traj-f function."
   [traj-f num-days]
   (comp traj-f (shift-date-ranges-f num-days)))
 
 
-;; #### sum-traj
-;; This sums a set of trajs, returning a new traj. We assume that all trajs are
-;; the same length and are associated with the same date ranges.
+;; ##traj-f summing functions
+
 (defn sum-traj
-  "Returns the sum of traj's"
+  "Sums a set of trajs, returning a new traj. We assume that all trajs are the
+  same length and are associated with the same date ranges."
   [& trajs]
   (if (pos? (count trajs)) (apply map + trajs) []))
 
-;; #### sum-named-traj
-;; This is the named version of sum-traj. 
+
 (defn sum-named-traj
   "Returns the sum of named-traj's"
   [& named-trajs]
   (if (pos? (count named-trajs)) (apply merge-with sum-traj named-trajs) {}))
 
-;; #### make-traj-f-element
-;; This is used to construct a function that can be used to generate a traj-f
-;; from effort data. The `start-bound-date` is the reference date for this
-;; function and is associated with the first value in `values`. The `values`
-;; vec contains effort info for each consecutive day after `start-bound-date`
-;;
-;; This returns a function that takes a date range and returns the sum of the
-;; efforts within that range. The range includes the start but not the end,
-;; i.e., it looks like this: [s-date, e-date).
+(defn sum-traj-fns
+  "Builds a function that returns the sum of a seq of traj-fns over a seq of
+  date ranges This function is used to sum multiple traj-fns together. The
+  result is the sum by whatever names in each traj-fn. This will be useful in
+  computing total loading by role for a set of projects (or other workables). 
+
+  This can also be used to sum projects 'in play' and overlay a set of planned
+  projects on top to see where the staff shortfalls are."
+  [traj-fns]
+  (fn [date-ranges] 
+    (let [named-traj-fs (map (fn [traj-fn] (traj-fn date-ranges)) traj-fns)]
+      (apply sum-named-traj named-traj-fs))))
+
+(defn squash-traj-fn
+  "Returns a function that sums the values across all names for a traj-fn.
+  This function can be used to create a function that squashes (i.e. sums) all
+  values in each date range.  This is useful in looking at an aggregate loading
+  chart by project/workable."
+  [traj-fn]
+  (fn [date-ranges]
+    (let [named-traj-f (traj-fn date-ranges)]
+      (apply map + (vals named-traj-f)))))
+
+;; ## traj-f construction functions
+
 (defn make-traj-f-element
-  "Returns a traj-fn that can be applied to a seq of date-ranges to product a traj"
+  "Returns a traj-fn that can be applied to a seq of date-ranges to produce a
+  traj.
+  
+  This is used to construct a function that can be used to generate a traj-f from
+  effort data. The `start-bound-date` is the reference date for this function
+  and is associated with the first value in `values`. The `values` vec contains
+  effort info for each consecutive day after `start-bound-date`
+
+  This returns a function that takes a date range and returns the sum of the
+  efforts within that range. The range includes the start but not the end,
+  i.e., it looks like this: `[s-date, e-date)`."
   [start-bound-date values]
   (let [end-bound-rel (count values)]
     (fn [[s-date e-date]]
@@ -158,52 +171,26 @@
         (apply + (subvec values s-rel e-rel))))))
 
 
-;; #### effort-data-to-traj-f
-;; This function takes an `effort-data` map that looks like this:
-;; 
-;;   `{:start-date (str-to-date "2011-08-22"), :values [1 2 3 4 5 5 4 3 2 1 ]}`
-;;
-;; and returns a traj-f defined over that data.
 (defn effort-data-to-traj-f
-  "Retrns a traj-f based on some data"
+  "Retrns a traj-f based on some data. This function takes an `effort-data` map that looks like this:
+
+    {:start-date date, :values [1 2 3 4 5 5 4 3 2 1 ]}
+
+  and returns a traj-f defined over that data."
   [{:keys [start-date values]}]
   (let [traj-fn (make-traj-f-element start-date values)]
     (fn [date-ranges] 
       (map traj-fn date-ranges)))) 
 
-;; #### effort-data-to-named-traj-f
-;; This takes effort data in the form of a `named-effort-map` and returns a a
-;; traj-fn based on it. The effort map looks like this:
-;;
-;;   `{"SW" {:start-date (str-to-date "2011-08-22"), :values [1 2 3 4 5 5 4 3 2 1 ]}}`
 (defn effort-data-to-named-traj-f
-  "Returns a named-traj-f based on some data"
+  "Returns a named-traj-f based on some data.  This takes effort data in the
+  form of a `named-effort-map` and returns a traj-fn based on it. The effort
+  map looks like this:
+
+    {'SW' {:start-date date, 
+           :values [1 2 3 4 5 5 4 3 2 1 ]}}"
   [named-effort-map]
   (let [named-traj-f (into {} (map (fn [[role effort-data]] 
                                      [role (effort-data-to-traj-f effort-data)]) named-effort-map))]
     (make-traj-fn named-traj-f)))
 
-;; #### sum-traj-fns
-;; This function is used to sum multiple traj-fns together. The result is the
-;; sum by whatever names in each traj-fn. This will be useful in computing
-;; total loading by role for a set of projects (or other workables). 
-;;
-;; This will also be used to sum projects in play together and then to overlay
-;; a set of planned projects on top to see where the staff shortfalls are.
-(defn sum-traj-fns
-  "Returns a function that returns the sum of a seq of traj-fns over a seq of date ranges"
-  [traj-fns]
-  (fn [date-ranges] 
-    (let [named-traj-fs (map (fn [traj-fn] (traj-fn date-ranges)) traj-fns)]
-      (apply sum-named-traj named-traj-fs))))
-
-;; #### squash-traj-fn
-;; This function is used to create a function that squashes (i.e. sums) all
-;; values in each date range.  This is useful in looking at an aggregate
-;; loading chart by project/workable.
-(defn squash-traj-fn
-  "Returns a function that sums the values across all names for a traj-fn"
-  [traj-fn]
-  (fn [date-ranges]
-    (let [named-traj-f (traj-fn date-ranges)]
-      (apply map + (vals named-traj-f)))))
