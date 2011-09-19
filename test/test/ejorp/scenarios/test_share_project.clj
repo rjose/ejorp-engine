@@ -18,7 +18,7 @@
     (is (= 412 (:owner-id (:metadata owned-project))))
     (is (nil? (:owner-id (:metadata jupiter))))))
 
-(def saturn (-> (Project. 1002 "Saturn" {} {} {})
+(def saturn (-> (Project. 1002 "Saturn" {} {} {} {})
                (workable/set-named-traj-f :planned-by-role traj-map2)
                (workable/set-dates :planned [jul15 nov30])))
 

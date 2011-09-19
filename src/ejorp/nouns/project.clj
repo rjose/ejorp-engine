@@ -6,7 +6,7 @@
   (:use [ejorp.protocols.workable :as workable]))
 
 ;; Projects implement the `Workable` protocol
-(defrecord Project [id name date-map named-traj-f metadata])
+(defrecord Project [id name date-map named-traj-f completion-info metadata])
 
 (extend-type Project
   workable/Workable
@@ -62,3 +62,16 @@
         new-asked-for-help (disj cur-asked-for-help helper-id)
         new-metadata (assoc (:metadata p) :asked-for-help new-asked-for-help)]
     (assoc p :metadata new-metadata)))
+
+
+(defn mark-complete
+  "Marks a project as complete"
+  [p]
+  (let [new-completion-info (assoc (:completion-info p) :is-complete true)]
+    (assoc p :completion-info new-completion-info)))
+
+(defn mark-incomplete
+  "Marks a project as incomplete"
+  [p]
+  (let [new-completion-info (assoc (:completion-info p) :is-complete false)]
+    (assoc p :completion-info new-completion-info)))
