@@ -47,7 +47,7 @@
 ;; This checks that we can get the duration of a workable. 
 ; TODO: We should update this function so it takes a key
 (deftest test-duration
-  (is (= 31 (workable/duration w1))))
+  (is (= 31.0 (workable/duration w1))))
 
 ;; This tests that we can get a traj-fn for a given key. This is an
 ;; interesting function because it's creating the traj-fn lazily based on
@@ -103,9 +103,9 @@
 
 (deftest test-total-loading-by-role
   (let [loading-fn (workable/total-loading-by-role [jupiter neptune saturn] :planned-by-role)]
-    (is (= {"SW" [9], "QA" [4]} (loading-fn [[jul15 nov30]])))))
+    (is (= {"SW" [9.0], "QA" [4.0]} (loading-fn [[jul15 nov30]])))))
 
 (deftest test-loading-by-workable
   (let [workable-map {"Jupiter" jupiter, "Neptune" neptune, "Saturn" saturn}
         loading-fn (workable/loading-by-workable workable-map :planned-by-role)]
-    (is (= {"Jupiter" [3], "Neptune" [5], "Saturn" [5]} (loading-fn [[jul15 nov30]])))))
+    (is (= {"Jupiter" [3.0], "Neptune" [5.0], "Saturn" [5.0]} (loading-fn [[jul15 nov30]])))))

@@ -70,7 +70,7 @@
     (is (= [1] (uniform-traj-f1 [[aug-12 aug-13]])))
     (is (= [3] (uniform-traj-f1 [[aug-10 aug-13]])))
     (is (= [6] (uniform-traj-f1 [[aug-10 aug-16]])))
-    (is (= [6] (uniform-traj-f1 [[aug-5 aug-25]])))
+    (is (= [6.0] (uniform-traj-f1 [[aug-5 aug-25]])))
     ))
 
 ;; Building uniform-named-traj-f is the starting point for doing any
@@ -79,7 +79,7 @@
   (is (approx= 3.0 (first (uniform-traj-3 [[aug-10 aug-16]])) 0.1))
   (is (approx= 1.5 (first (uniform-traj-3 [[aug-10 aug-13]])) 0.1))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-5 aug-10]])) 0.1))
-  (is (= 0 (first (uniform-traj-3 [[aug-10 aug-10]]))))
+  (is (= 0.0 (first (uniform-traj-3 [[aug-10 aug-10]]))))
   (is (approx= 0.0 (first (uniform-traj-3 [[aug-16 aug-25]])) 0.1)))
   
 ;; The `traj-fn` will be the workhouse of any project loading computations.
@@ -150,9 +150,9 @@
 ;; This tests that we can sum two traj-fn's together.
 (deftest test-sum-traj-fns
   (let [sum-fn (sum-traj-fns [traj-fn1 traj-fn2])]
-    (is (= {"SW" [4], "QA" [2]} (sum-fn [[aug-10 aug-16]])))))
+    (is (= {"SW" [4.0], "QA" [2.0]} (sum-fn [[aug-10 aug-16]])))))
 
 ;; This tests that we can squash a traj-fn.
 (deftest test-squash-traj-fn
   (let [squashed-fn (squash-traj-fn traj-fn1)]
-    (is (= [4] (squashed-fn [[aug-10 aug-16]])))))
+    (is (= [4.0] (squashed-fn [[aug-10 aug-16]])))))
